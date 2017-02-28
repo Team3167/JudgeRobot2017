@@ -1,6 +1,8 @@
 
 package org.usfirst.frc.team3167.robot;
 
+import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
+
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -24,21 +26,32 @@ public class Robot extends IterativeRobot {
     String autoSelected;
     SendableChooser chooser;
     
-    //private Joystick stick;
+    static final private double robotFrequency = 50.0;// [Hz]
+    
+    private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
+    
+    private final Joystick stick = new Joystick(1);
     
     private Climber climber;
     private RobotConfiguration robotConfig;
-    private TestDriveHARDNUMBERS testDrive;
+    //private TestDriveHARDNUMBERS testDrive;
     private GearHanger gearHanger;
     
-    static final private int motor1EncoderA = 10;
-    static final private int motor1EncoderB = 11;
-    static final private int motor2EncoderA = 16;
-    static final private int motor2EncoderB = 17;
-    static final private int motor3EncoderA = 12;
-    static final private int motor3EncoderB = 13;
-    static final private int motor4EncoderA = 14;
-    static final private int motor4EncoderB = 15;
+    private RobotDrive mDrive;
+    
+    static final private int encoderLeftRearA = 10;
+    static final private int encoderLeftRearB = 11;
+    static final private int encoderRightFrontA = 16;
+    static final private int encoderRightFrontB = 17;
+    static final private int encoderRightRearA = 12;
+    static final private int encoderRightRearB = 13;
+    static final private int encoderLeftFrontA = 14;
+    static final private int encoderLeftFrontB = 15;
+    
+    static final private int motorLeftRearChannel = 1;
+    static final private int motorRightFrontChannel = 2;
+    static final private int motorRightRearChannel = 3;
+    static final private int motorLeftFrontChannel = 4;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -49,15 +62,20 @@ public class Robot extends IterativeRobot {
         chooser.addDefault("Default Auto", defaultAuto);
         chooser.addObject("My Auto", customAuto);
         SmartDashboard.putData("Auto choices", chooser);*/
-    	
-    	//stick = new Joystick(1);
+   
     	climber = new Climber(1, 5); 
     	robotConfig = new RobotConfiguration(); 
-    	testDrive = new TestDriveHARDNUMBERS(1, 2, 3, 4,
+    	/*testDrive = new TestDriveHARDNUMBERS(1, 2, 3, 4,
     			motor1EncoderA, motor1EncoderB,
     			motor2EncoderA, motor2EncoderB,
     			motor3EncoderA, motor3EncoderB,
-    			motor4EncoderA, motor4EncoderB);
+    			motor4EncoderA, motor4EncoderB);//*/
+    	
+    	mDrive = new RobotDrive(new Talon(motorLeftFrontChannel),
+    			new Talon(motorLeftRearChannel),
+    			new Talon(motorRightFrontChannel),
+    			new Talon(motorRightRearChannel));
+    	//InitializeHolonomicDrive();
     	gearHanger = new GearHanger(1, 6, 8, 9); 
     }
     
@@ -92,17 +110,20 @@ public class Robot extends IterativeRobot {
     }
     
     public void teleopInit() {
-    	testDrive.resetEncoders(); 
+    	drive.Reset(); 
     }
 
     /**
      * This function is called periodically during operator control
      */
-    public void teleopPeriodic() {     	
+    public void teleopPeriodic() {
     	//hard number drive based on button input (encoder testing)
-    	testDrive.hardNumDrive(0.8);
+    	//testDrive.hardNumDrive(0.8);
     	
-    	//drive.mecanumDrive_Cartesian(stick.getX(), stick.getY(), stick.getTwist(), 0);
+    	
+    	mDrive.mecanumDrive_Cartesian(stick.getX() * 0.5, stick.getY() * 0.5, stick.getTwist() * 0.5, 0);
+    	// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
+    	//drive.Drive(stick.getX(), stick.getY(), stick.getTwist());
     	
     	//handle climber (with multiple speeds)
     	//could remove reverse spins (currently just a fail-safe)
@@ -123,6 +144,63 @@ public class Robot extends IterativeRobot {
     }
     
     public void disabledPeriodic() {
+    }
+    
+    private static Encoder CreateNewEncoder(int aChannel, int bChannel,
+    		boolean reverse, EncodingType encoding, int pulsesPerRev)
+    {
+    	Encoder encoder = new Encoder(aChannel, bChannel, reverse, encoding);
+    	encoder.setDistancePerPulse(360.0 / pulsesPerRev);
+    	encoder.setSamplesToAverage(5);
+    	return encoder;
+    }
+    
+    private boolean InitializeHolonomicDrive()
+    {
+    	// X is positive right
+    	// Y is positive forward
+    	final double halfWidth = 22.5 * 0.5;// [in]
+    	final double halfLength = 13.0 * 0.5;// [in]
+    	final double gearRatio = 9.0;
+    	final double rollerAngle = 45.0;// [deg]
+    	final double radius = 4.0;// [in]
+    	final double maxMotorSpeed = 5000.0;// [RPM]
+    	final double maxSpeed = maxMotorSpeed / gearRatio * 2.0 * Math.PI / 60.0;// [rad/sec]
+    	
+    	final double kp = 1.0;
+    	final double ki = 0.0;
+    	final double saturation = 0.0;
+    	final double filterOmega = 10.0;// [Hz]
+    	final double filterZeta = 1.0;
+    	
+    	final EncodingType encoding = EncodingType.k4X;
+    	final int encoderPPR = 1024;
+    	
+    	// Left front (motor 4)
+    	drive.AddWheel(-halfWidth, halfLength, -1.0, 0.0,
+    			rollerAngle, radius, gearRatio, new Talon(motorLeftFrontChannel),
+    			maxSpeed, CreateNewEncoder(encoderLeftFrontA, encoderLeftFrontB, false, encoding, encoderPPR),
+    			kp, ki, saturation, filterOmega, filterZeta);
+    	
+    	// Right front (motor 2)
+    	drive.AddWheel(halfWidth, halfLength, 1.0, 0.0,
+    			-rollerAngle, radius, gearRatio, new Talon(motorRightFrontChannel),
+    			maxSpeed, CreateNewEncoder(encoderRightFrontA, encoderRightFrontB, false, encoding, encoderPPR),
+    			kp, ki, saturation, filterOmega, filterZeta);
+    	
+    	// Left rear (motor 1)
+    	drive.AddWheel(-halfWidth, -halfLength, -1.0, 0.0,
+    			-rollerAngle, radius, gearRatio, new Talon(motorLeftRearChannel),
+    			maxSpeed, CreateNewEncoder(encoderLeftRearA, encoderLeftRearB, true, encoding, encoderPPR),
+    			kp, ki, saturation, filterOmega, filterZeta);
+    	
+    	// Right rear (motor 3)
+    	drive.AddWheel(halfWidth, -halfLength, 1.0, 0.0,
+    			rollerAngle, radius, gearRatio, new Talon(motorRightRearChannel),
+    			maxSpeed, CreateNewEncoder(encoderRightRearA, encoderRightRearB, true, encoding, encoderPPR),
+    			kp, ki, saturation, filterOmega, filterZeta);
+    			
+    	return drive.Initialize();
     }
     
 }
