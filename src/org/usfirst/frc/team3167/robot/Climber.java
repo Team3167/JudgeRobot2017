@@ -7,12 +7,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Climber {
 	private Jaguar motor;
 	private Joystick stick; 
+	private Joystick stick2; 
 	
 	RobotConfiguration robotConfig = new RobotConfiguration(); 
 	
-	public Climber(int joystickPort, int motorPort) {
+	public Climber(int joystickPort, int joystick2Port, int motorPort) {
 		motor = new Jaguar(motorPort);
 		stick = new Joystick(joystickPort);
+		stick2 = new Joystick(joystick2Port); 
 	}
 	
 	public void slowSpin() {
@@ -49,30 +51,30 @@ public class Climber {
 	
 	public void operate() {
 		String msg = "";
-    	if(stick.getRawButton(1)) {
+    	if(stick.getRawButton(1) || stick2.getRawButton(1)) {
     		slowSpin();
     		SmartDashboard.putString("Climber function: ", robotConfig.slowSpinMSG);
     		msg = "Slow spin";
     	}
-    	else if(stick.getRawButton(2)) {
+    	else if(stick.getRawButton(2) || stick2.getRawButton(2)) {
     		slowSpinReverse();
     		msg = "Slow spin (R)";
     	}
-    	else if(stick.getRawButton(5)) {
+    	else if(stick.getRawButton(5) || stick2.getRawButton(5)) {
     		mediumSpin();
     		//SmartDashboard.putString("Climber function: ", robotConfig.mediumSpinMSG);
     		msg = "Medium spin";
     	}
-    	else if(stick.getRawButton(3)) {
+    	else if(stick.getRawButton(3) || stick2.getRawButton(3)) {
     		mediumSpinReverse();
     		msg = "Medium spin (R)";
     	}
-    	else if(stick.getRawButton(6)) {
+    	else if(stick.getRawButton(6) || stick2.getRawButton(6)) {
     		fullSpin();
     		//SmartDashboard.putString("Climber function: ", robotConfig.fullSpinMSG);
     		msg = "Full spin";
     	}
-    	else if(stick.getRawButton(4)) {
+    	else if(stick.getRawButton(4) || stick2.getRawButton(4)) {
     		fullSpinReverse();
     		msg = "Full spin (R)";
     	} else {

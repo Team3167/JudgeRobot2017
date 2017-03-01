@@ -6,12 +6,10 @@ import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -34,6 +32,7 @@ public class Robot extends IterativeRobot {
     
     private Climber climber;
     private RobotConfiguration robotConfig;
+    private Vision vision; 
     //private TestDriveHARDNUMBERS testDrive;
     private GearHanger gearHanger;
     
@@ -63,7 +62,7 @@ public class Robot extends IterativeRobot {
         chooser.addObject("My Auto", customAuto);
         SmartDashboard.putData("Auto choices", chooser);*/
    
-    	climber = new Climber(1, 5); 
+    	climber = new Climber(1, 2, 5); 
     	robotConfig = new RobotConfiguration(); 
     	/*testDrive = new TestDriveHARDNUMBERS(1, 2, 3, 4,
     			motor1EncoderA, motor1EncoderB,
@@ -76,7 +75,9 @@ public class Robot extends IterativeRobot {
     			new Talon(motorRightFrontChannel),
     			new Talon(motorRightRearChannel));
     	//InitializeHolonomicDrive();
-    	gearHanger = new GearHanger(1, 6, 8, 9); 
+    	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
+    	vision = new Vision();
+    	vision.enable();
     }
     
 	/**
@@ -121,7 +122,8 @@ public class Robot extends IterativeRobot {
     	//testDrive.hardNumDrive(0.8);
     	
     	
-    	mDrive.mecanumDrive_Cartesian(stick.getX() * 0.5, stick.getY() * 0.5, stick.getTwist() * 0.5, 0);
+    	//mDrive.mecanumDrive_Cartesian(stick.getX() * 0.5, stick.getY() * 0.5, stick.getTwist() * 0.5, 0);
+    	
     	// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
     	//drive.Drive(stick.getX(), stick.getY(), stick.getTwist());
     	
@@ -129,7 +131,7 @@ public class Robot extends IterativeRobot {
     	//could remove reverse spins (currently just a fail-safe)
     	climber.operate(); 
     	
-    	gearHanger.hangGear();
+    	gearHanger.hangGear(0.6);
     }
     
     /**
