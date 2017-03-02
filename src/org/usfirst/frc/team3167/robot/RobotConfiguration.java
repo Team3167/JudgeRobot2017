@@ -6,7 +6,8 @@ public class RobotConfiguration {
 	final double climberMediumSpeed = 0.6;
 	final double climberTopSpeed = 1.0; 
 	
-	final String slowSpinMSG = "Searching for loop...";
-	final String mediumSpinMSG = "Got loop, begin climbing...";
-	final String fullSpinMSG = "Now climbing...";
+	/*final String slowSpinMSG = "Slow spin";
+	final String mediumSpinMSG = "Medium spin";
+	final String fullSpinMSG = "Full spin";
+	final String haltedMSG = "Neutral position*/
 }
