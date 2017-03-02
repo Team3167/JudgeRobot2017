@@ -76,7 +76,7 @@ public class Robot extends IterativeRobot {
     			new Talon(motorRightRearChannel));
     	//InitializeHolonomicDrive();
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
-    	vision = new Vision();
+    	vision = new Vision("cam0");
     	vision.enable();
     }
     

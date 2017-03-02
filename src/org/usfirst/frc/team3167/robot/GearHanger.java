@@ -24,43 +24,54 @@ public class GearHanger {
 		double lowerSpeed = hookSpeed; 
 		double stop = 0.0; 
 		
+		int forwardPos = 0;
+		int reversePos = 180; 
+		
+		//used for diagnostic 	
 		String hookMsg = "";
 		String switchMsg = "";
+		String povMsg = ""; 
 		
-		if(stick.getPOV() == 0 || stick2.getPOV() == 0) {
+		if(stick.getPOV() == forwardPos || stick2.getPOV() == forwardPos) {
 			gearMotor.set(liftSpeed);
 			hookMsg = "Lifting hook";
+			povMsg = "Forward";
 			
 			if(!limitSwitchHigh.get()) {
 				gearMotor.set(stop);
 				switchMsg = "High pressed";
 				
-				if(stick.getPOV() == 180 || stick2.getPOV() == 180) {
+				if(stick.getPOV() == reversePos || stick2.getPOV() == reversePos) {
 					gearMotor.set(lowerSpeed);
 					hookMsg = "Lowering hook";
+					povMsg = "Reverse";
 				}
 			}
 		}
-		else if(stick.getPOV() == 180 || stick2.getPOV() == 180) {
+		else if(stick.getPOV() == reversePos || stick2.getPOV() == reversePos) {
 			gearMotor.set(lowerSpeed);
 			hookMsg = "Lowering hook";
+			povMsg = "Reverse";
 			
 			if(!limitSwitchLow.get()) {
 				gearMotor.set(stop);
 				switchMsg = "Low pressed";
 				
-				if(stick.getPOV() == 0 || stick2.getPOV() == 0) {
+				if(stick.getPOV() == forwardPos || stick2.getPOV() == forwardPos) {
 					gearMotor.set(liftSpeed);
 					hookMsg = "Lifting hook";
+					povMsg = "Forward";
 				}
 			}
 		} else {
 			gearMotor.set(stop);
 			hookMsg = "Neutral position";
+			povMsg = "Centered";
 		}
 		
 		SmartDashboard.putString("Gear function: ", hookMsg);
 		SmartDashboard.putString("Microswitch Function: ", switchMsg);
+		SmartDashboard.putString("POV Position: ", povMsg);
 	}
 
 }

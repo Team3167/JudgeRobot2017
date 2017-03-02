@@ -53,7 +53,6 @@ public class Climber {
 		String msg = "";
     	if(stick.getRawButton(1) || stick2.getRawButton(1)) {
     		slowSpin();
-    		SmartDashboard.putString("Climber function: ", robotConfig.slowSpinMSG);
     		msg = "Slow spin";
     	}
     	else if(stick.getRawButton(2) || stick2.getRawButton(2)) {
@@ -62,7 +61,6 @@ public class Climber {
     	}
     	else if(stick.getRawButton(5) || stick2.getRawButton(5)) {
     		mediumSpin();
-    		//SmartDashboard.putString("Climber function: ", robotConfig.mediumSpinMSG);
     		msg = "Medium spin";
     	}
     	else if(stick.getRawButton(3) || stick2.getRawButton(3)) {
@@ -71,14 +69,13 @@ public class Climber {
     	}
     	else if(stick.getRawButton(6) || stick2.getRawButton(6)) {
     		fullSpin();
-    		//SmartDashboard.putString("Climber function: ", robotConfig.fullSpinMSG);
     		msg = "Full spin";
     	}
     	else if(stick.getRawButton(4) || stick2.getRawButton(4)) {
     		fullSpinReverse();
     		msg = "Full spin (R)";
     	} else {
-    		haltMotor(); 
+    		haltMotor();
     		msg = "Halted";
     	}
     	SmartDashboard.putString("Climber function: ", msg);

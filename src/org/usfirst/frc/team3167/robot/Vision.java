@@ -4,13 +4,18 @@ import edu.wpi.first.wpilibj.CameraServer;
 
 public class Vision {
 	
-	CameraServer camServer = CameraServer.getInstance();
+	CameraServer camServer;
+	String camLocation; 
+	
+	public Vision(String cameraLocation) {
+		camServer = CameraServer.getInstance();
+		camLocation = cameraLocation;
+	}
 	
 	public void enable() {
 		setDetails();
-		camServer.startAutomaticCapture("cam0");
+		camServer.startAutomaticCapture(camLocation);
 	}
-	
 	public void setDetails() {
 		camServer.setQuality(25); 
 		camServer.setSize(75);
