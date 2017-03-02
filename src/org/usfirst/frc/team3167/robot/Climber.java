@@ -17,6 +17,7 @@ public class Climber {
 		stick2 = new Joystick(joystick2Port); 
 	}
 	
+	//modify motor speeds
 	public void slowSpin() {
 		motor.set(-robotConfig.climberSlowSpeed);
 	}
@@ -39,6 +40,7 @@ public class Climber {
 		motor.set(0.0);
 	}
 	
+	//accessors
 	public double getSlowSpeed() {
 		return robotConfig.climberSlowSpeed;
 	}
@@ -78,7 +80,6 @@ public class Climber {
     		haltMotor();
     		msg = "Halted";
     	}
-    	SmartDashboard.putString("Climber function: ", msg);
-		
+    	SmartDashboard.putString("Climber function: ", msg);	
 	}
 }

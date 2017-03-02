@@ -68,12 +68,14 @@ public class Robot extends IterativeRobot {
     			motor1EncoderA, motor1EncoderB,
     			motor2EncoderA, motor2EncoderB,
     			motor3EncoderA, motor3EncoderB,
-    			motor4EncoderA, motor4EncoderB);//*/
+    			motor4EncoderA, motor4EncoderB); */
     	
-    	mDrive = new RobotDrive(new Talon(motorLeftFrontChannel),
+    	//testDrive = new TestDriveHARDNUMBERS(1, 2, 3, 4); 
+    	
+    	/*mDrive = new RobotDrive(new Talon(motorLeftFrontChannel),
     			new Talon(motorLeftRearChannel),
     			new Talon(motorRightFrontChannel),
-    			new Talon(motorRightRearChannel));
+    			new Talon(motorRightRearChannel));*/
     	//InitializeHolonomicDrive();
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
     	vision = new Vision("cam0");
@@ -122,7 +124,7 @@ public class Robot extends IterativeRobot {
     	//testDrive.hardNumDrive(0.8);
     	
     	
-    	//mDrive.mecanumDrive_Cartesian(stick.getX() * 0.5, stick.getY() * 0.5, stick.getTwist() * 0.5, 0);
+    	mDrive.mecanumDrive_Cartesian(stick.getX() * 0.5, stick.getY() * 0.5, stick.getTwist() * 0.5, 0);
     	
     	// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
     	//drive.Drive(stick.getX(), stick.getY(), stick.getTwist());
@@ -131,7 +133,9 @@ public class Robot extends IterativeRobot {
     	//could remove reverse spins (currently just a fail-safe)
     	climber.operate(); 
     	
-    	gearHanger.hangGear(0.6);
+    	gearHanger.hangGear(0.5);
+    	
+    	testDrive.sendDistToDash();
     }
     
     /**

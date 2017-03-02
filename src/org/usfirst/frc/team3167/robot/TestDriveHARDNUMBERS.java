@@ -46,6 +46,13 @@ public class TestDriveHARDNUMBERS {
         encoder4.setDistancePerPulse(360.0 / 1024.0);
     }
     
+    public TestDriveHARDNUMBERS(int motor1P, int motor2P, int motor3P, int motor4P) {
+    	motor1 = new Talon(motor1P);
+    	motor2 = new Talon(motor2P); 
+    	motor3 = new Talon(motor3P); 
+    	motor4 = new Talon(motor4P); 
+    }
+    
     public void setDistPerPulse() {
     	
     }
