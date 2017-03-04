@@ -116,9 +116,9 @@ public class Robot extends IterativeRobot {
     	
     	//handle climber (with multiple speeds)
     	//could remove reverse spins (currently just a fail-safe)
-    	//climber.operate(); 
+    	climber.operate(); 
     	
-    	//gearHanger.hangGear(0.5);
+    	gearHanger.hangGear(0.5);
     	
     	//testDrive.sendDistToDash();
     }
