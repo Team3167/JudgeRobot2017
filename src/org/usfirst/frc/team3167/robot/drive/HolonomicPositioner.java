@@ -32,14 +32,14 @@ public class HolonomicPositioner
 	private final double thetaTolerance = 2.5;// [deg]
 
 	private final double kpLinearFine = 5.0;
-	private final double kiLinearFine = 1.0;
+	private final double tiLinearFine = 1.0;
 	private final double kpRotaryFine = 0.1;
-	private final double kiRotaryFine = 0.01;
+	private final double tiRotaryFine = 0.01;
 
 	private final double kpLinearCoarse = 5.0;
-	private final double kiLinearCoarse = 0.02;
+	private final double tiLinearCoarse = 0.02;
 	private final double kpRotaryCoarse = 0.02;
-	private final double kiRotaryCoarse = 0.01;
+	private final double tiRotaryCoarse = 0.01;
 
 	// Methods
 	/**
@@ -186,13 +186,13 @@ public class HolonomicPositioner
 	public final void SetCoarseGains()
 	{
 		xController.SetKp(kpLinearCoarse);
-		xController.SetKi(kiLinearCoarse);
+		xController.SetTi(tiLinearCoarse);
 
 		yController.SetKp(kpLinearCoarse);
-		yController.SetKi(kiLinearCoarse);
+		yController.SetTi(tiLinearCoarse);
 
 		thetaController.SetKp(kpRotaryCoarse);
-		thetaController.SetKi(kiRotaryCoarse);
+		thetaController.SetTi(tiRotaryCoarse);
 	}
 
 	/**
@@ -202,13 +202,13 @@ public class HolonomicPositioner
 	public final void SetFineGains()
 	{
 		xController.SetKp(kpLinearFine);
-		xController.SetKi(kiLinearFine);
+		xController.SetTi(tiLinearFine);
 		
 		yController.SetKp(kpLinearFine);
-		yController.SetKi(kiLinearFine);
+		yController.SetTi(tiLinearFine);
 
 		thetaController.SetKp(kpRotaryFine);
-		thetaController.SetKi(kiRotaryFine);
+		thetaController.SetTi(tiRotaryFine);
 	}
 }
 

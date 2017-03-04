@@ -2,14 +2,17 @@
 package org.usfirst.frc.team3167.robot;
 
 import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
+import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
 import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -25,6 +28,10 @@ public class Robot extends IterativeRobot {
     SendableChooser chooser;
     
     static final private double robotFrequency = 50.0;// [Hz]
+    
+    private final boolean useSimpleDrive = true;
+    private SimpleMecanumDrive mecanumDrive;
+    private RobotDrive d;
     
     private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
     
@@ -62,7 +69,15 @@ public class Robot extends IterativeRobot {
     	climber = new Climber(1, 2, 5); 
     	robotConfig = new RobotConfiguration(); 
  
-    	InitializeHolonomicDrive();
+    	if (useSimpleDrive)
+    		mecanumDrive = new SimpleMecanumDrive(
+    				new Talon(motorLeftFrontChannel),
+    				new Talon(motorLeftRearChannel),
+    				new Talon(motorRightFrontChannel),
+    				new Talon(motorRightRearChannel));
+    	else
+    		InitializeHolonomicDrive();
+    	
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
     	vision = new Vision("cam0");
     	vision.enable();
@@ -106,13 +121,23 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-    	// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
-    	drive.Drive(stick);
-    	drive.DoSmartDashboardWheelVelocities();
+    	if (useSimpleDrive)
+    	{
+    		/*SmartDashboard.putNumber("Right: ", stick.GetRight());
+        	SmartDashboard.putNumber("Forward: ", stick.GetForward());
+        	SmartDashboard.putNumber("Twist: ", stick.GetTwist());//*/
+    		mecanumDrive.Drive(-stick.GetRight(), -stick.GetForward(), stick.GetTwist());
+    	}
+    	else
+    	{
+    		// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
+    		drive.Drive(stick);
+    		drive.DoSmartDashboardWheelVelocities();
     	
-    	drive.UpdateGains(Preferences.getInstance().getDouble("kp", 0.02),
-    			Preferences.getInstance().getDouble("ki", 0.08));
-    	//prefs.getDouble("filter", 5.0);
+    		drive.UpdateGains(Preferences.getInstance().getDouble("kp", 0.02),
+    			Preferences.getInstance().getDouble("ti", 1.0));
+    		//prefs.getDouble("filter", 5.0);
+    	}
     	
     	//handle climber (with multiple speeds)
     	//could remove reverse spins (currently just a fail-safe)
@@ -171,7 +196,7 @@ public class Robot extends IterativeRobot {
     	final double maxSpeed = maxMotorSpeed / gearRatio * 2.0 * Math.PI / 60.0;// [rad/sec]
     	
     	final double kp = 0.02;
-    	final double ki = 0.08;
+    	final double ti = 1.0;
     	final double saturation = 0.0;
     	final double filterOmega = 10.0;// [Hz]
     	final double filterZeta = 1.0;
@@ -183,25 +208,25 @@ public class Robot extends IterativeRobot {
     	drive.AddWheel(-halfWidth, halfLength, -1.0, 0.0,
     			rollerAngle, radius, gearRatio, new Talon(motorLeftFrontChannel),
     			maxSpeed, CreateNewEncoder(encoderLeftFrontA, encoderLeftFrontB, false, encoding, encoderPPR),
-    			kp, ki, saturation, filterOmega, filterZeta);
+    			kp, ti, saturation, filterOmega, filterZeta);
     	
     	// Right front (motor 4)
     	drive.AddWheel(halfWidth, halfLength, 1.0, 0.0,
     			-rollerAngle, radius, gearRatio, new Talon(motorRightFrontChannel),
     			maxSpeed, CreateNewEncoder(encoderRightFrontA, encoderRightFrontB, false, encoding, encoderPPR),
-    			kp, ki, saturation, filterOmega, filterZeta);
+    			kp, ti, saturation, filterOmega, filterZeta);
     	
     	// Left rear (motor 1)
     	drive.AddWheel(-halfWidth, -halfLength, -1.0, 0.0,
     			-rollerAngle, radius, gearRatio, new Talon(motorLeftRearChannel),
     			maxSpeed, CreateNewEncoder(encoderLeftRearA, encoderLeftRearB, false, encoding, encoderPPR),
-    			kp, ki, saturation, filterOmega, filterZeta);
+    			kp, ti, saturation, filterOmega, filterZeta);
     	
     	// Right rear (motor 3)
     	drive.AddWheel(halfWidth, -halfLength, 1.0, 0.0,
     			rollerAngle, radius, gearRatio, new Talon(motorRightRearChannel),
     			maxSpeed, CreateNewEncoder(encoderRightRearA, encoderRightRearB, false, encoding, encoderPPR),
-    			kp, ki, saturation, filterOmega, filterZeta);
+    			kp, ti, saturation, filterOmega, filterZeta);
     	
     	drive.SetDeadband(0.05);
     	drive.SetFrictionCoefficient(1.0);

@@ -202,7 +202,7 @@ public class HolonomicDrive
 	 * @param reverseEncoder	Flag indicating wheter or not the encoder's
 	 * positive direction should be swapped
 	 * @param kp				Proportional gain
-	 * @param ki				Integral gain
+	 * @param ti				Integral gain
 	 * @param saturation		Maximum allowable magnitude of the integral of
 	 * the error signal
 	 * @param dFiltOmega		Cutoff frequency for the filter on the feedback
@@ -213,14 +213,14 @@ public class HolonomicDrive
     public void AddWheel(double posX, double posY, double axisX, double axisY,
                 double rollerAngle, double radius, double gearRatioWheel,
 				SpeedController motor, double maxSpeed,
-                Encoder encoder, double kp, double ki,
+                Encoder encoder, double kp, double ti,
                 double saturation, double dFiltOmega, double dFiltZeta)
     {
         // Create the wheel object and add it to the array
         Wheel newWheel;
 		newWheel = new Wheel(posX, posY, axisX, axisY, rollerAngle,
 			radius, gearRatioWheel, motor, maxSpeed,
-			kp, ki, saturation, dFiltOmega, dFiltZeta, freq,
+			kp, ti, saturation, dFiltOmega, dFiltZeta, freq,
 			encoder);
 
         wheelList.Add(newWheel);
@@ -271,14 +271,14 @@ public class HolonomicDrive
     public void AddWheel(double posX, double posY, double axisX, double axisY,
                 double rollerAngle, double radius, double gearRatioWheel,
 				SpeedController motor, double maxSpeed,
-                Encoder encoder, double kp, double ki,
+                Encoder encoder, double kp, double ti,
                 int queueSize, double dFiltOmega, double dFiltZeta)
     {
         // Create the wheel object and add it to the array
         Wheel newWheel;
 		newWheel = new Wheel(posX, posY, axisX, axisY, rollerAngle,
 			radius, gearRatioWheel, motor, maxSpeed,
-			kp, ki, queueSize, dFiltOmega, dFiltZeta, freq,
+			kp, ti, queueSize, dFiltOmega, dFiltZeta, freq,
 			encoder);
 
         wheelList.Add(newWheel);
@@ -331,14 +331,14 @@ public class HolonomicDrive
                 double rollerAngle, double radius, double gearRatioWheel,
 				SpeedController motor, double maxSpeed,
                 Encoder encoder,
-                double kp, double ki, double kd, double saturation,
+                double kp, double ti, double kd, double saturation,
                 double dFiltOmega, double dFiltZeta)
     {
         // Create the wheel object and add it to the array
         Wheel newWheel;
 		newWheel = new Wheel(posX, posY, axisX, axisY, rollerAngle,
 			    radius, gearRatioWheel, motor,
-				kp, ki, kd, saturation, dFiltOmega, dFiltZeta, freq,
+				kp, ti, kd, saturation, dFiltOmega, dFiltZeta, freq,
 				encoder);
 
         wheelList.Add(newWheel);
@@ -392,7 +392,7 @@ public class HolonomicDrive
                 double rollerAngle, double radius, double gearRatioWheel,
 				SpeedController motor, double maxSpeed,
                 Encoder encoder,
-                double kp, double ki, double kd, int queueSize,
+                double kp, double ti, double kd, int queueSize,
 				double dFiltOmega, double dFiltZeta)
     {
         // Create the wheel object and add it to the array
@@ -400,7 +400,7 @@ public class HolonomicDrive
 		newWheel = new Wheel(posX, posY, axisX, axisY, rollerAngle,
 			    radius, gearRatioWheel,
 				motor,
-				kp, ki, kd, queueSize, dFiltOmega, dFiltZeta, freq,
+				kp, ti, kd, queueSize, dFiltOmega, dFiltZeta, freq,
 				encoder);
 
         wheelList.Add(newWheel);
@@ -989,10 +989,10 @@ public class HolonomicDrive
 					wheelList.Get(i).GetYPos() + ")", wheelList.Get(i).GetWheelVelocity());
 	}
 	
-	public void UpdateGains(double kp, double ki)
+	public void UpdateGains(double kp, double ti)
 	{
 		int i;
 		for (i = 0; i < wheelList.Size(); i++)
-			wheelList.Get(i).UpdateGains(kp, ki);
+			wheelList.Get(i).UpdateGains(kp, ti);
 	}
 }

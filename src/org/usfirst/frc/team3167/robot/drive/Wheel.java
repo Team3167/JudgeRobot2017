@@ -146,7 +146,7 @@ public class Wheel
 	 * @param _maxRotationRate	Maximum rotation rate of the wheel (not the
 	 * motor, nor the encoder) [rad/sec]
 	 * @param Kp				Proportional gain
-	 * @param Ki				Integral gain
+	 * @param Ti				Integral gain
 	 * @param queueSize			Number of error samples used to compute the
 	 * integral of the error [-]
 	 * @param omega				Cutoff frequency for feedback filter [Hz]
@@ -167,7 +167,7 @@ public class Wheel
     public Wheel(double _posX, double _posY, double _axisX, double _axisY,
             double _rollerAngle, double _radius, double _gearRatio,
 			SpeedController _motor, double _maxRotationRate,
-			double Kp, double Ki, int queueSize,
+			double Kp, double Ti, int queueSize,
 			double omega, double zeta, double _freq,
             Encoder _encoder)
     {
@@ -197,7 +197,7 @@ public class Wheel
         motor.set(0.0);
 
         // Create controller object
-        controller = new PIDControllerII(Kp, Ki, queueSize, freq);
+        controller = new PIDControllerII(Kp, Ti, queueSize, freq);
     }
 
 	/**
@@ -224,7 +224,7 @@ public class Wheel
 	 * @param _maxRotationRate	Maximum rotation rate of the wheel (not the
 	 * motor, nor the encoder) [rad/sec]
 	 * @param Kp				Proportional gain
-	 * @param Ki				Integral gain
+	 * @param Ti				Integral gain
 	 * @param saturation		Maximum allowable magnitude of the integral of
 	 * the error signal
 	 * @param omega				Cutoff frequency for feedback filter [Hz]
@@ -245,7 +245,7 @@ public class Wheel
     public Wheel(double _posX, double _posY, double _axisX, double _axisY,
             double _rollerAngle, double _radius, double _gearRatio,
 			SpeedController _motor, double _maxRotationRate,
-			double Kp, double Ki, double saturation,
+			double Kp, double Ti, double saturation,
 			double omega, double zeta, double _freq,
             Encoder _encoder)
     {
@@ -274,7 +274,7 @@ public class Wheel
         motor.set(0.0);
 
         // Create controller object
-        controller = new PIDControllerII(Kp, Ki, saturation, freq);
+        controller = new PIDControllerII(Kp, Ti, saturation, freq);
     }
 
     /**
@@ -301,7 +301,7 @@ public class Wheel
 	 * @param _maxRotationRate	Maximum rotation rate of the wheel (not the
 	 * motor, nor the encoder) [rad/sec]
 	 * @param Kp				Proportional gain
-	 * @param Ki				Integral gain
+	 * @param Ti				Integral gain
 	 * @param Kd				Derivative gain
 	 * @param queueSize			Number of error samples used to compute the
 	 * integral of the error [-]
@@ -323,7 +323,7 @@ public class Wheel
     public Wheel(double _posX, double _posY, double _axisX, double _axisY,
             double _rollerAngle, double _radius, double _gearRatio,
 			SpeedController _motor, double _maxRotationRate,
-            double Kp, double Ki, double Kd,
+            double Kp, double Ti, double Kd,
             int queueSize, double omega, double zeta, double _freq,
             Encoder _encoder)
     {
@@ -352,7 +352,7 @@ public class Wheel
         motor.set(0.0);
 
         // Create controller object
-        controller = new PIDControllerII(Kp, Ki, Kd,
+        controller = new PIDControllerII(Kp, Ti, Kd,
                 queueSize, omega, zeta, freq);
     }
 
@@ -380,7 +380,7 @@ public class Wheel
 	 * @param _maxRotationRate	Maximum rotation rate of the wheel (not the
 	 * motor, nor the encoder) [rad/sec]
 	 * @param Kp				Proportional gain
-	 * @param Ki				Integral gain
+	 * @param Ti				Integral gain
 	 * @param Kd				Derivative gain
 	 * @param saturation		Maximum allowable magnitude of the integral of
 	 * the error signal
@@ -402,7 +402,7 @@ public class Wheel
     public Wheel(double _posX, double _posY, double _axisX, double _axisY,
             double _rollerAngle, double _radius, double _gearRatio,
 			SpeedController _motor, double _maxRotationRate,
-            double Kp, double Ki, double Kd,
+            double Kp, double Ti, double Kd,
             double saturation, double omega, double zeta, double _freq,
             Encoder _encoder)
     {
@@ -431,7 +431,7 @@ public class Wheel
         motor.set(0.0);
 
         // Create controller object
-        controller = new PIDControllerII(Kp, Ki, Kd,
+        controller = new PIDControllerII(Kp, Ti, Kd,
                 saturation, omega, zeta, freq);
     }
 
@@ -619,9 +619,9 @@ public class Wheel
 		return false;
 	}
 	
-	public void UpdateGains(double kp, double ki)
+	public void UpdateGains(double kp, double ti)
 	{
 		controller.SetKp(kp);
-		controller.SetKi(ki);
+		controller.SetTi(ti);
 	}
 }

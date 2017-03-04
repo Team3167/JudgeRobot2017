@@ -325,5 +325,6 @@ public class PIDControllerII
     public void ResetError()
     {
         integralValue = 0.0;
+        // TODO:  Clear queue
     }
 }
