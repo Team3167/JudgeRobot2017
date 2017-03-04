@@ -7,11 +7,9 @@ import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -109,7 +107,12 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
     	// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
-    	drive.Drive(stick.GetRight(), stick.GetForward(), stick.GetTwist());
+    	drive.Drive(stick);
+    	drive.DoSmartDashboardWheelVelocities();
+    	
+    	drive.UpdateGains(Preferences.getInstance().getDouble("kp", 0.02),
+    			Preferences.getInstance().getDouble("ki", 0.08));
+    	//prefs.getDouble("filter", 5.0);
     	
     	//handle climber (with multiple speeds)
     	//could remove reverse spins (currently just a fail-safe)
@@ -138,10 +141,10 @@ public class Robot extends IterativeRobot {
     	// 1.  Encoders are associated with the correct wheel
     	// 2.  Positive direction for each encoder is correct
     	// 3.  Gear ratios are correct
-    	//drive.TestEncoders();
+    	//drive.DoSmartDashboardWheelPositions();
     	
     	// For checking signs for joystick inputs:
-    	SmartDashboard.putNumber("Right: ", stick.GetRight());
+    	/*SmartDashboard.putNumber("Right: ", stick.GetRight());
     	SmartDashboard.putNumber("Forward: ", stick.GetForward());
     	SmartDashboard.putNumber("Twist: ", stick.GetTwist());//*/
     }
@@ -151,7 +154,7 @@ public class Robot extends IterativeRobot {
     {
     	Encoder encoder = new Encoder(aChannel, bChannel, reverse, encoding);
     	encoder.setDistancePerPulse(360.0 / pulsesPerRev);
-    	encoder.setSamplesToAverage(5);
+    	//encoder.setSamplesToAverage(5);
     	return encoder;
     }
     
@@ -167,8 +170,8 @@ public class Robot extends IterativeRobot {
     	final double maxMotorSpeed = 5000.0;// [RPM]
     	final double maxSpeed = maxMotorSpeed / gearRatio * 2.0 * Math.PI / 60.0;// [rad/sec]
     	
-    	final double kp = 1.0;
-    	final double ki = 0.0;
+    	final double kp = 0.02;
+    	final double ki = 0.08;
     	final double saturation = 0.0;
     	final double filterOmega = 10.0;// [Hz]
     	final double filterZeta = 1.0;
@@ -185,7 +188,7 @@ public class Robot extends IterativeRobot {
     	// Right front (motor 4)
     	drive.AddWheel(halfWidth, halfLength, 1.0, 0.0,
     			-rollerAngle, radius, gearRatio, new Talon(motorRightFrontChannel),
-    			maxSpeed, CreateNewEncoder(encoderRightFrontA, encoderRightFrontB, true, encoding, encoderPPR),
+    			maxSpeed, CreateNewEncoder(encoderRightFrontA, encoderRightFrontB, false, encoding, encoderPPR),
     			kp, ki, saturation, filterOmega, filterZeta);
     	
     	// Left rear (motor 1)
@@ -197,7 +200,7 @@ public class Robot extends IterativeRobot {
     	// Right rear (motor 3)
     	drive.AddWheel(halfWidth, -halfLength, 1.0, 0.0,
     			rollerAngle, radius, gearRatio, new Talon(motorRightRearChannel),
-    			maxSpeed, CreateNewEncoder(encoderRightRearA, encoderRightRearB, true, encoding, encoderPPR),
+    			maxSpeed, CreateNewEncoder(encoderRightRearA, encoderRightRearB, false, encoding, encoderPPR),
     			kp, ki, saturation, filterOmega, filterZeta);
     	
     	drive.SetDeadband(0.05);

@@ -988,4 +988,11 @@ public class HolonomicDrive
 			SmartDashboard.putNumber("speed (" + wheelList.Get(i).GetXPos() + ", " +
 					wheelList.Get(i).GetYPos() + ")", wheelList.Get(i).GetWheelVelocity());
 	}
+	
+	public void UpdateGains(double kp, double ki)
+	{
+		int i;
+		for (i = 0; i < wheelList.Size(); i++)
+			wheelList.Get(i).UpdateGains(kp, ki);
+	}
 }

@@ -619,4 +619,10 @@ public class Wheel
 
 		return false;
 	}
+	
+	public void UpdateGains(double kp, double ki)
+	{
+		controller.SetKp(kp);
+		controller.SetKi(ki);
+	}
 }
