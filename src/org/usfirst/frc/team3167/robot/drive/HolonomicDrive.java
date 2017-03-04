@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // Judge imports
 import org.usfirst.frc.team3167.robot.math.Matrix;
 import org.usfirst.frc.team3167.robot.util.SecondOrderLimiter;
+import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 import org.usfirst.frc.team3167.robot.util.PIDControllerII;
 //import org.usfirst.frc.team3167.robot.sensors.RateGyro;
 
@@ -651,12 +652,12 @@ public class HolonomicDrive
 	 *
 	 * @throws IllegalStateException
 	 */
-    public void Drive(Joystick stick)
+    public void Drive(JoystickWrapper stick)
             throws IllegalStateException
     {
 		// NOTE:  Added yaw control 2/23/2012 to help fix weight distribution
 		// problem.  Modifies yaw cmd prior to calculating wheel commands
-		double yawCmd = ApplyDeadband(stick.getTwist() * omegaMax);
+		//double yawCmd = ApplyDeadband(stick.getTwist() * omegaMax);
 		/*yawCmd = yawController.DoControl(yawCmd,
 				-yawGyro.getRate() * Math.PI / 180.0);*/
 
@@ -664,8 +665,9 @@ public class HolonomicDrive
 		// Joystick X axis is left-right, positive right (no change necessary)
 		// Joystick Y axis if fore-aft, positive aft (requires sign change)
 		// Joystick twist is positive nose right (requires sign change)
-        Drive(yawCmd, ApplyDeadband(-stick.getY()) * vYMax,
-				ApplyDeadband(-stick.getX()) * vXMax);
+        /*Drive(yawCmd, ApplyDeadband(-stick.getY()) * vYMax,
+				ApplyDeadband(-stick.getX()) * vXMax);*/
+    	Drive(stick.GetRight() * vXMax, stick.GetForward() * vYMax, stick.GetTwist() * omegaMax);
     }
 
     /**
@@ -968,11 +970,22 @@ public class HolonomicDrive
 	/**
 	 * 
 	 */
-	public void TestEncoders()
+	public void DoSmartDashboardWheelPositions()
 	{
 		int i;
 		for (i = 0; i < wheelList.Size(); i++)
-			SmartDashboard.putNumber("wheel (" + wheelList.Get(i).GetXPos() + ", " +
-					wheelList.Get(i).GetYPos() + "): ", wheelList.Get(i).GetWheelPosition());
+			SmartDashboard.putNumber("angle (" + wheelList.Get(i).GetXPos() + ", " +
+					wheelList.Get(i).GetYPos() + ") ", wheelList.Get(i).GetWheelPosition());
+	}
+	
+	/**
+	 * 
+	 */
+	public void DoSmartDashboardWheelVelocities()
+	{
+		int i;
+		for (i = 0; i < wheelList.Size(); i++)
+			SmartDashboard.putNumber("speed (" + wheelList.Get(i).GetXPos() + ", " +
+					wheelList.Get(i).GetYPos() + ")", wheelList.Get(i).GetWheelVelocity());
 	}
 }

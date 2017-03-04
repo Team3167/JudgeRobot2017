@@ -75,4 +75,9 @@ public class SecondOrderFilter
 
         return out;
     }
+    
+    public double GetFilteredValue()
+    {
+    	return lastOut;
+    }
 }

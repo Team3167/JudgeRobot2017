@@ -2,6 +2,7 @@
 package org.usfirst.frc.team3167.robot;
 
 import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
+import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
@@ -10,6 +11,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -28,15 +30,12 @@ public class Robot extends IterativeRobot {
     
     private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
     
-    private final Joystick stick = new Joystick(1);
+    private final JoystickWrapper stick = new JoystickWrapper(1);
     
     private Climber climber;
     private RobotConfiguration robotConfig;
     private Vision vision; 
-    //private TestDriveHARDNUMBERS testDrive;
     private GearHanger gearHanger;
-    
-    private RobotDrive mDrive;
     
     static final private int encoderLeftFrontA = 16;
     static final private int encoderLeftFrontB = 17;
@@ -64,18 +63,7 @@ public class Robot extends IterativeRobot {
    
     	climber = new Climber(1, 2, 5); 
     	robotConfig = new RobotConfiguration(); 
-    	/*testDrive = new TestDriveHARDNUMBERS(1, 2, 3, 4,
-    			motor1EncoderA, motor1EncoderB,
-    			motor2EncoderA, motor2EncoderB,
-    			motor3EncoderA, motor3EncoderB,
-    			motor4EncoderA, motor4EncoderB); */
-    	
-    	//testDrive = new TestDriveHARDNUMBERS(1, 2, 3, 4); 
-    	
-    	/*mDrive = new RobotDrive(new Talon(motorLeftFrontChannel),
-    			new Talon(motorLeftRearChannel),
-    			new Talon(motorRightFrontChannel),
-    			new Talon(motorRightRearChannel));*/
+ 
     	InitializeHolonomicDrive();
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
     	vision = new Vision("cam0");
@@ -120,20 +108,14 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-    	//hard number drive based on button input (encoder testing)
-    	//testDrive.hardNumDrive(0.8);
-    	
-    	
-    	mDrive.mecanumDrive_Cartesian(stick.getX() * 0.5, stick.getY() * 0.5, stick.getTwist() * 0.5, 0);
-    	
     	// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
-    	//drive.Drive(stick.getX(), stick.getY(), stick.getTwist());
+    	drive.Drive(stick.GetRight(), stick.GetForward(), stick.GetTwist());
     	
     	//handle climber (with multiple speeds)
     	//could remove reverse spins (currently just a fail-safe)
-    	climber.operate(); 
+    	//climber.operate(); 
     	
-    	gearHanger.hangGear(0.5);
+    	//gearHanger.hangGear(0.5);
     	
     	//testDrive.sendDistToDash();
     }
@@ -157,6 +139,11 @@ public class Robot extends IterativeRobot {
     	// 2.  Positive direction for each encoder is correct
     	// 3.  Gear ratios are correct
     	//drive.TestEncoders();
+    	
+    	// For checking signs for joystick inputs:
+    	SmartDashboard.putNumber("Right: ", stick.GetRight());
+    	SmartDashboard.putNumber("Forward: ", stick.GetForward());
+    	SmartDashboard.putNumber("Twist: ", stick.GetTwist());//*/
     }
     
     private static Encoder CreateNewEncoder(int aChannel, int bChannel,

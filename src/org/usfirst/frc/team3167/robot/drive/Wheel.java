@@ -180,8 +180,8 @@ public class Wheel
         rollerAngle = _rollerAngle;
         radius = _radius;
 		freq = _freq;
-		maxRotationRate = _maxRotationRate;
 		gearRatio = _gearRatio;
+		maxRotationRate = _maxRotationRate / gearRatio;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -258,8 +258,8 @@ public class Wheel
         rollerAngle = _rollerAngle;
         radius = _radius;
 		freq = _freq;
-		maxRotationRate = _maxRotationRate;
 		gearRatio = _gearRatio;
+		maxRotationRate = _maxRotationRate / gearRatio;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -336,8 +336,8 @@ public class Wheel
         rollerAngle = _rollerAngle;
         radius = _radius;
 		freq = _freq;
-		maxRotationRate = _maxRotationRate;
 		gearRatio = _gearRatio;
+		maxRotationRate = _maxRotationRate / gearRatio;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -415,8 +415,8 @@ public class Wheel
         rollerAngle = _rollerAngle;
         radius = _radius;
 		freq = _freq;
-		maxRotationRate = _maxRotationRate;
 		gearRatio = _gearRatio;
+		maxRotationRate = _maxRotationRate / gearRatio;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -451,7 +451,7 @@ public class Wheel
         // the PWM between -1 and 1.
         if (controlType == CONTROL_CLOSED_LOOP)
         {
-			double position = encoder.getDistance();// [rad at wheel]
+			double position = encoder.getDistance() / gearRatio * Math.PI / 180.0;// [rad at wheel]
             wheelVelocity = rateFilter.Apply((position - lastPosition) * freq);
             lastPosition = position;
             motorPWMCmd = controller.DoControl(cmdOmega, wheelVelocity);
@@ -560,7 +560,7 @@ public class Wheel
 	 */
     public double GetWheelVelocity()
     {
-        return wheelVelocity;// [rad/sec at the wheel]
+        return rateFilter.GetFilteredValue();// [rad/sec at the wheel]
     }
 
 	/**
