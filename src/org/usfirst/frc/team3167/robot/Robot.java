@@ -38,19 +38,19 @@ public class Robot extends IterativeRobot {
     
     private RobotDrive mDrive;
     
+    static final private int encoderLeftFrontA = 16;
+    static final private int encoderLeftFrontB = 17;
+    static final private int encoderRightFrontA = 14;
+    static final private int encoderRightFrontB = 15;
     static final private int encoderLeftRearA = 10;
     static final private int encoderLeftRearB = 11;
-    static final private int encoderRightFrontA = 16;
-    static final private int encoderRightFrontB = 17;
     static final private int encoderRightRearA = 12;
     static final private int encoderRightRearB = 13;
-    static final private int encoderLeftFrontA = 14;
-    static final private int encoderLeftFrontB = 15;
     
+    static final private int motorLeftFrontChannel = 2;
     static final private int motorLeftRearChannel = 1;
-    static final private int motorRightFrontChannel = 2;
+    static final private int motorRightFrontChannel = 4;
     static final private int motorRightRearChannel = 3;
-    static final private int motorLeftFrontChannel = 4;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -76,7 +76,7 @@ public class Robot extends IterativeRobot {
     			new Talon(motorLeftRearChannel),
     			new Talon(motorRightFrontChannel),
     			new Talon(motorRightRearChannel));*/
-    	//InitializeHolonomicDrive();
+    	InitializeHolonomicDrive();
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
     	vision = new Vision("cam0");
     	vision.enable();
@@ -135,7 +135,7 @@ public class Robot extends IterativeRobot {
     	
     	gearHanger.hangGear(0.5);
     	
-    	testDrive.sendDistToDash();
+    	//testDrive.sendDistToDash();
     }
     
     /**
@@ -150,6 +150,13 @@ public class Robot extends IterativeRobot {
     }
     
     public void disabledPeriodic() {
+    	// Uncomment for testing the encoders - prints wheel angles to dashboard
+    	// Wheels are identified with (x,y) position; angles are in degrees
+    	// Can manually move each wheel to ensure:
+    	// 1.  Encoders are associated with the correct wheel
+    	// 2.  Positive direction for each encoder is correct
+    	// 3.  Gear ratios are correct
+    	//drive.TestEncoders();
     }
     
     private static Encoder CreateNewEncoder(int aChannel, int bChannel,
@@ -182,22 +189,22 @@ public class Robot extends IterativeRobot {
     	final EncodingType encoding = EncodingType.k4X;
     	final int encoderPPR = 1024;
     	
-    	// Left front (motor 4)
+    	// Left front (motor 2)
     	drive.AddWheel(-halfWidth, halfLength, -1.0, 0.0,
     			rollerAngle, radius, gearRatio, new Talon(motorLeftFrontChannel),
     			maxSpeed, CreateNewEncoder(encoderLeftFrontA, encoderLeftFrontB, false, encoding, encoderPPR),
     			kp, ki, saturation, filterOmega, filterZeta);
     	
-    	// Right front (motor 2)
+    	// Right front (motor 4)
     	drive.AddWheel(halfWidth, halfLength, 1.0, 0.0,
     			-rollerAngle, radius, gearRatio, new Talon(motorRightFrontChannel),
-    			maxSpeed, CreateNewEncoder(encoderRightFrontA, encoderRightFrontB, false, encoding, encoderPPR),
+    			maxSpeed, CreateNewEncoder(encoderRightFrontA, encoderRightFrontB, true, encoding, encoderPPR),
     			kp, ki, saturation, filterOmega, filterZeta);
     	
     	// Left rear (motor 1)
     	drive.AddWheel(-halfWidth, -halfLength, -1.0, 0.0,
     			-rollerAngle, radius, gearRatio, new Talon(motorLeftRearChannel),
-    			maxSpeed, CreateNewEncoder(encoderLeftRearA, encoderLeftRearB, true, encoding, encoderPPR),
+    			maxSpeed, CreateNewEncoder(encoderLeftRearA, encoderLeftRearB, false, encoding, encoderPPR),
     			kp, ki, saturation, filterOmega, filterZeta);
     	
     	// Right rear (motor 3)
@@ -205,6 +212,11 @@ public class Robot extends IterativeRobot {
     			rollerAngle, radius, gearRatio, new Talon(motorRightRearChannel),
     			maxSpeed, CreateNewEncoder(encoderRightRearA, encoderRightRearB, true, encoding, encoderPPR),
     			kp, ki, saturation, filterOmega, filterZeta);
+    	
+    	drive.SetDeadband(0.05);
+    	drive.SetFrictionCoefficient(1.0);
+    	drive.SetMinimumOutput(0.0);
+    	drive.SetPosition(0.0, 0.0, 0.0);
     			
     	return drive.Initialize();
     }

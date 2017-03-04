@@ -59,6 +59,9 @@ public class Wheel
 
 	// Maximum allowable speed for this wheel
 	private final double maxRotationRate;// [rad/sec at the wheel]
+	
+	// Gear ratio between the encoder and the wheel (not necessarily the same as between the motor and wheel!)
+	private final double gearRatio;// [-]
 
     // The encoder object
     private final Encoder encoder;
@@ -101,6 +104,7 @@ public class Wheel
         posY = _posY;
         rollerAngle = _rollerAngle;
         radius = _radius;
+        gearRatio = 1.0;
 
         maxRotationRate = maxSpeed;
 
@@ -161,7 +165,7 @@ public class Wheel
 	 * direction of the encoer should be swapped
 	 */
     public Wheel(double _posX, double _posY, double _axisX, double _axisY,
-            double _rollerAngle, double _radius, double gearRatio,
+            double _rollerAngle, double _radius, double _gearRatio,
 			SpeedController _motor, double _maxRotationRate,
 			double Kp, double Ki, int queueSize,
 			double omega, double zeta, double _freq,
@@ -177,6 +181,7 @@ public class Wheel
         radius = _radius;
 		freq = _freq;
 		maxRotationRate = _maxRotationRate;
+		gearRatio = _gearRatio;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -238,7 +243,7 @@ public class Wheel
 	 * direction of the encoer should be swapped
 	 */
     public Wheel(double _posX, double _posY, double _axisX, double _axisY,
-            double _rollerAngle, double _radius, double gearRatio,
+            double _rollerAngle, double _radius, double _gearRatio,
 			SpeedController _motor, double _maxRotationRate,
 			double Kp, double Ki, double saturation,
 			double omega, double zeta, double _freq,
@@ -254,6 +259,7 @@ public class Wheel
         radius = _radius;
 		freq = _freq;
 		maxRotationRate = _maxRotationRate;
+		gearRatio = _gearRatio;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -315,7 +321,7 @@ public class Wheel
 	 * direction of the encoer should be swapped
 	 */
     public Wheel(double _posX, double _posY, double _axisX, double _axisY,
-            double _rollerAngle, double _radius, double gearRatio,
+            double _rollerAngle, double _radius, double _gearRatio,
 			SpeedController _motor, double _maxRotationRate,
             double Kp, double Ki, double Kd,
             int queueSize, double omega, double zeta, double _freq,
@@ -331,6 +337,7 @@ public class Wheel
         radius = _radius;
 		freq = _freq;
 		maxRotationRate = _maxRotationRate;
+		gearRatio = _gearRatio;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -393,7 +400,7 @@ public class Wheel
 	 * direction of the encoer should be swapped
 	 */
     public Wheel(double _posX, double _posY, double _axisX, double _axisY,
-            double _rollerAngle, double _radius, double gearRatio,
+            double _rollerAngle, double _radius, double _gearRatio,
 			SpeedController _motor, double _maxRotationRate,
             double Kp, double Ki, double Kd,
             double saturation, double omega, double zeta, double _freq,
@@ -409,6 +416,7 @@ public class Wheel
         radius = _radius;
 		freq = _freq;
 		maxRotationRate = _maxRotationRate;
+		gearRatio = _gearRatio;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -463,6 +471,19 @@ public class Wheel
 
         // Issue the motor speed command
         motor.set(motorPWMCmd);
+    }
+    
+    public double GetWheelPosition()
+    {
+    	return GetEncoderAngle() / gearRatio;
+    }
+    
+    public double GetEncoderAngle()
+    {
+    	if (encoder == null)
+    		return 0.0;
+    	
+    	return encoder.getDistance();
     }
 
 	/**

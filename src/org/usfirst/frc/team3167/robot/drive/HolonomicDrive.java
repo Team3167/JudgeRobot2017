@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.ADXL345_I2C;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Judge imports
 import org.usfirst.frc.team3167.robot.math.Matrix;
@@ -443,8 +444,7 @@ public class HolonomicDrive
             robotArray[i][2] = wheelList.Get(i).GetXPos() * robotArray[i][1] -
                     wheelList.Get(i).GetYPos() * robotArray[i][0];
         }
-		robotArray[0][2] = -robotArray[2][2];
-		robotArray[1][2] = -robotArray[2][2];
+
         robotMatrix = new Matrix(robotArray);
 		//System.out.println(robotMatrix.Print());
 		/*robotMatrix.SetElement(2, 2, -robotMatrix.GetElement(0, 2));
@@ -963,5 +963,16 @@ public class HolonomicDrive
 		}
 
 		return true;
+	}
+	
+	/**
+	 * 
+	 */
+	public void TestEncoders()
+	{
+		int i;
+		for (i = 0; i < wheelList.Size(); i++)
+			SmartDashboard.putNumber("wheel (" + wheelList.Get(i).GetXPos() + ", " +
+					wheelList.Get(i).GetYPos() + "): ", wheelList.Get(i).GetWheelPosition());
 	}
 }
