@@ -181,7 +181,7 @@ public class Wheel
         radius = _radius;
 		freq = _freq;
 		gearRatio = _gearRatio;
-		maxRotationRate = _maxRotationRate / gearRatio;
+		maxRotationRate = _maxRotationRate;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -259,7 +259,7 @@ public class Wheel
         radius = _radius;
 		freq = _freq;
 		gearRatio = _gearRatio;
-		maxRotationRate = _maxRotationRate / gearRatio;
+		maxRotationRate = _maxRotationRate;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -337,7 +337,7 @@ public class Wheel
         radius = _radius;
 		freq = _freq;
 		gearRatio = _gearRatio;
-		maxRotationRate = _maxRotationRate / gearRatio;
+		maxRotationRate = _maxRotationRate;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -416,7 +416,7 @@ public class Wheel
         radius = _radius;
 		freq = _freq;
 		gearRatio = _gearRatio;
-		maxRotationRate = _maxRotationRate / gearRatio;
+		maxRotationRate = _maxRotationRate;
 
         controlType = CONTROL_CLOSED_LOOP;
 
@@ -455,7 +455,6 @@ public class Wheel
             wheelVelocity = rateFilter.Apply((position - lastPosition) * freq);
             lastPosition = position;
             motorPWMCmd = controller.DoControl(cmdOmega, wheelVelocity);
-            //motorPWMCmd = cmdOmega / maxRotationRate;// Uncomment for open loop
         }
         else
         {
