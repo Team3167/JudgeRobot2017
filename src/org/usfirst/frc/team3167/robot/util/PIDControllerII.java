@@ -24,7 +24,7 @@ public class PIDControllerII
 {
     // Fields
     // Controller gains
-    private double Kp = 1.0, Ki = 0.0, Kd = 0.0;
+    private double Kp = 1.0, Ti = 0.0, Kd = 0.0;
 
     // Filter for derivative term
     private SecondOrderFilter derivativeFilter;
@@ -48,16 +48,16 @@ public class PIDControllerII
 	 * integral time (only remember the most recent error samples).
 	 *
 	 * @param _Kp			Proportional gain
-	 * @param _Ki			Integral gain
+	 * @param _Ti			Integral gain
 	 * @param _queueSize	Number of error samples to hold in the integral
 	 * queue
 	 * @param _freq			Fixed frequency at which the loop is closed [Hz]
 	 */
-    public PIDControllerII(double _Kp, double _Ki, int _queueSize, double _freq)
+    public PIDControllerII(double _Kp, double _Ti, int _queueSize, double _freq)
     {
         // Initialize the gains
         Kp = _Kp;
-        Ki = _Ki;
+        Ti = _Ti;
 
 		freq = _freq;
 
@@ -73,17 +73,17 @@ public class PIDControllerII
 	 * integral term.
 	 *
 	 * @param _Kp			Proportional gain
-	 * @param _Ki			Integral gain
+	 * @param _Ti			Integral gain
 	 * @param _saturation	Maximum allowable magnitude of the integral of the
 	 * error signal
 	 * @param _freq			Fixed frequency at which the loop is closed [Hz]
 	 */
-    public PIDControllerII(double _Kp, double _Ki, double _saturation,
+    public PIDControllerII(double _Kp, double _Ti, double _saturation,
 			double _freq)
     {
         // Initialize the gains
         Kp = _Kp;
-        Ki = _Ki;
+        Ti = _Ti;
 
 		freq = _freq;
 
@@ -99,7 +99,7 @@ public class PIDControllerII
 	 * time (only remember the most recent error samples).
 	 *
 	 * @param _Kp			Proportional gain
-	 * @param _Ki			Integral gain
+	 * @param _Ti			Integral gain
 	 * @param _Kd			Derivative gain
 	 * @param _queueSize	Number of error samples to hold in the integral
 	 * queue
@@ -109,12 +109,12 @@ public class PIDControllerII
 	 * zero to disable filter)
 	 * @param _freq			Fixed frequency at which the loop is closed [Hz]
 	 */
-    public PIDControllerII(double _Kp, double _Ki, double _Kd,
+    public PIDControllerII(double _Kp, double _Ti, double _Kd,
             int _queueSize, double omega, double zeta, double _freq)
     {
         // Initialize the gains
         Kp = _Kp;
-        Ki = _Ki;
+        Ti = _Ti;
         Kd = _Kd;
 
 		freq = _freq;
@@ -135,7 +135,7 @@ public class PIDControllerII
 	 * integral term.
 	 *
 	 * @param _Kp			Proportional gain
-	 * @param _Ki			Integral gain
+	 * @param _Ti			Integral gain
 	 * @param _Kd			Derivative gain
 	 * @param _saturation	Maximum allowable magnitude of the integral of the
 	 * error signal
@@ -145,12 +145,12 @@ public class PIDControllerII
 	 * zero to disable filter)
 	 * @param _freq			Fixed frequency at which the loop is closed [Hz]
 	 */
-	public PIDControllerII(double _Kp, double _Ki, double _Kd,
+	public PIDControllerII(double _Kp, double _Ti, double _Kd,
             double _saturation, double omega, double zeta, double _freq)
     {
         // Initialize the gains
         Kp = _Kp;
-        Ki = _Ki;
+        Ti = _Ti;
         Kd = _Kd;
 
 		freq = _freq;
@@ -198,7 +198,10 @@ public class PIDControllerII
 
         // Generate the new command signal (input to plant/output of controller)
         // and return it
-        return Kp * error + Ki * integralValue + Kd * errorDot;
+		if (Ti > 0)
+			return Kp * (error + integralValue / Ti + Kd * errorDot);
+				     
+        return Kp * (error + Kd * errorDot);
     }
 
     // Accessor methods=========================================================
@@ -217,9 +220,9 @@ public class PIDControllerII
 	 *
 	 * @return Integral gain value
 	 */
-    public double GetKi()
+    public double GetTi()
     {
-        return Ki;
+        return Ti;
     }
 
 	/**
@@ -255,11 +258,11 @@ public class PIDControllerII
 	/**
 	 * Sets the integral gain to the specified value.
 	 *
-	 * @param _Ki	New integral gain
+	 * @param _Ti	New integral gain
 	 */
-    public void SetKi(double _Ki)
+    public void SetTi(double _Ti)
     {
-        Ki = _Ki;
+        Ti = _Ti;
     }
 
 	/**
