@@ -33,6 +33,9 @@ public class Robot extends IterativeRobot {
     private SimpleMecanumDrive mecanumDrive;
     private RobotDrive d;
     
+    private final int listenForRPiOnPort = 5801;
+    private final Networking rpiInterface = new Networking(listenForRPiOnPort);
+    
     private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
     
     private final JoystickWrapper stick = new JoystickWrapper(1);
@@ -114,13 +117,23 @@ public class Robot extends IterativeRobot {
     }
     
     public void teleopInit() {
-    	drive.Reset(); 
+    	drive.Reset();
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
+        if (rpiInterface.GotPositionUpdate())
+        {
+            // TODO:  This is where we need to put code to automatically steer
+            // based on the position data we get back
+            Networking.RobotPosition pos = rpiInterface.GetLatestPosition();
+            SmartDashboard.putNumber("image x: ", pos.x);
+        	SmartDashboard.putNumber("image y: ", pos.y);
+        	SmartDashboard.putNumber("image theta: ", pos.theta);//*/
+        }
+        
     	if (useSimpleDrive)
     	{
     		/*SmartDashboard.putNumber("Right: ", stick.GetRight());
