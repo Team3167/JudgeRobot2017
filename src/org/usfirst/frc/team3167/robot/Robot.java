@@ -7,6 +7,7 @@ import org.usfirst.frc.team3167.robot.util.JoystickButton;
 import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -23,8 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
  * directory.
  */
 public class Robot extends IterativeRobot {
-    String climberCamLoc, gearCamLoc, finalCam;
-    SendableChooser chooser;
+    //String climberCamLoc, gearCamLoc, finalCam;
+    //SendableChooser chooser;
     
     static final private double robotFrequency = 50.0;// [Hz]
     
@@ -82,7 +83,7 @@ public class Robot extends IterativeRobot {
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
     	
     	vision = new Vision();
-    	//vision.enable();
+    	vision.enable("cam0");
     }
     
 	/**
@@ -116,19 +117,14 @@ public class Robot extends IterativeRobot {
     }
     
     public void teleopInit() {
-    	/*(finalCam = chooser.getSelected(); 
-    	vision.enable(finalCam);*/
+    	drive.Reset();
+    	vision.enable("cam0");
     }
 
     /**
      * This function is called periodically during operator control
      */
-    public void teleopPeriodic() {
-    	if(stick.getRawButton(11))
-    		vision.enable(gearCamLoc);
-    	else if(stick.getRawButton(12))
-    		vision.enable(climberCamLoc);
-    	
+    public void teleopPeriodic() {    	
     	if (useSimpleDrive)
     	{
     		/*SmartDashboard.putNumber("Right: ", stick.GetRight());
