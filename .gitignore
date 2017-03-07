@@ -3,6 +3,5 @@ build/
 *.jar
 *.swp
 dist/
-.classpath
 *.pyc
 __pycache__/

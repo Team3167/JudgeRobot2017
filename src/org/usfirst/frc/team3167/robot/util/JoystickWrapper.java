@@ -6,10 +6,12 @@ import edu.wpi.first.wpilibj.Joystick;
 public class JoystickWrapper {
 	
 	private final Joystick stick;
+	private final JoystickButton driveToGearPegButton;
 	
 	public JoystickWrapper(int stickID)
 	{
 		stick = new Joystick(stickID);
+		driveToGearPegButton = new JoystickButton(stick, 8);
 	}
 	
 	public double GetForward()
@@ -25,5 +27,10 @@ public class JoystickWrapper {
 	public double GetTwist()
 	{
 		return -stick.getTwist();
+	}
+	
+	public boolean AutoDriveToGearPeg()
+	{
+		driveToGearPegButton.HasJustBeenPressed();
 	}
 }

@@ -20,7 +20,6 @@ import org.usfirst.frc.team3167.robot.math.Matrix;
 import org.usfirst.frc.team3167.robot.util.SecondOrderLimiter;
 import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 import org.usfirst.frc.team3167.robot.util.PIDControllerII;
-//import org.usfirst.frc.team3167.robot.sensors.RateGyro;
 
 /**
  * Holonomic drive class for use with independently driven mecanum or omni
@@ -81,21 +80,10 @@ public class HolonomicDrive
     private Matrix inverseRobotMatrix;
     private Matrix measuredWheelVelocity;
     private Matrix estimatedRobotVelocity = new Matrix(3,1);
+    private Matrix estimatedRobotPosition = new Matrix(3,1);
 
 	// Objects used in the modeling of robot motion
 	private Matrix predictedRobotVelocity = new Matrix(3,1);
-
-	// Robot navigation object
-//    private Navigator navigator;
-
-	/*private PIDControllerII yawController = new PIDControllerII(
-			RobotConfiguration.yawKp,
-			RobotConfiguration.yawKi,
-			RobotConfiguration.yawQueueSize,
-			RobotConfiguration.frequency);
-	private RateGyro yawGyro = new RateGyro(
-			RobotConfiguration.analogInputModule,
-			RobotConfiguration.yawGyroChannel);*/
 
     // Methods
     /**
@@ -111,30 +99,8 @@ public class HolonomicDrive
 	 */
     public HolonomicDrive(double _freq)
     {
-        // Assign the running frequency
         freq = _freq;
-
-        // Create the wheel list
         wheelList = new WheelList();
-
-		// Create the navigation object
-        /*int gyroChannel = 1;
-		double gyroXPos = 0.0;// [in]. positive right
-		double gyroYPos = 0.0;// [in], positive forward
-		double accelXPos = 0.0;// [in], positive right
-		double accelYPos = 0.0;// [in], positive forward
-		double gyroSensitivity = 0.007;// [V-sec/deg]
-		double orientation = 0.0;// [deg]
-		navigator = new Navigator(this, freq, analogInputModule, gyroChannel,
-                digitalSideCarModule, gyroXPos, gyroYPos, orientation,
-				accelXPos, accelYPos, orientation,
-				gyroSensitivity, ADXL345_I2C.DataFormat_Range.k2G);
-		int leftFrontChan = 4;
-		int rightFrontChan = 5;
-		int leftRearChan = 6;
-		int rightRearChan = 7;
-		navigator.CreateIRSensors(analogInputModule, leftFrontChan,
-				rightFrontChan, leftRearChan, rightRearChan);*/
     }
 
     /**
@@ -409,7 +375,7 @@ public class HolonomicDrive
 	/**
 	 * Initialization method for the HolonomicRobotDrive object.  MUST be called
 	 * prior to using this class to control robot motion.  Failing to do so will
-	 * result in an excpetion being thrown.
+	 * result in an exception being thrown.
 	 * <p>
 	 * Prior to calling this method, all of the wheels being controlled by this
 	 * object must have been added with the appropriate AddWheel() method.
@@ -717,6 +683,44 @@ public class HolonomicDrive
 	{
 		return estimatedRobotVelocity;
 	}
+	
+	/**
+	 * Updates the robot position and veloctiy estimates without closing loops.
+	 * Useful for "feedback-only" mode when using higher-level controller.
+	 */
+	public void UpdateEstimates()
+	{
+		if (!initialized)
+            throw new IllegalStateException(
+					"Error:  Object is not initialized!" +
+					"  Use HolonomicRobotDrive.Initialize() prior to use.");
+		
+		// Issue the velocity commands for each wheel
+        // Velocities are in rad/sec at the wheel
+        int i;
+        for (i = 0; i < measuredWheelVelocity.GetRowCount(); i++)
+        {
+        	wheelList.Get(i).UpdateWheelVelocity();
+        	
+            // Get the velocity feedback from the wheel's encoder and store it
+            measuredWheelVelocity.SetElement(i, 0,
+                    wheelList.Get(i).GetWheelVelocity());
+        }
+
+        // Calculate the estimated robot velocity based on the feedback from all
+        // of the encoders
+        estimatedRobotVelocity = inverseRobotMatrix.Multiply(
+				measuredWheelVelocity);
+        
+        estimatedRobotPosition = estimatedRobotPosition.Add(estimatedRobotVelocity.Multiply(1.0 / freq));
+	}
+	
+	public void ResetPositions(double x, double y, double theta)
+	{
+		estimatedRobotPosition.SetElement(0, 0, x);
+		estimatedRobotPosition.SetElement(1, 0, y);
+		estimatedRobotPosition.SetElement(2, 0, theta);
+	}
 
 	/**
 	 * NOT YET IMPLEMENTED
@@ -889,8 +893,7 @@ public class HolonomicDrive
 	 */
 	public double GetXPosition()
 	{
-		//return navigator.GetX();
-		return 0.0;
+		return estimatedRobotPosition.GetElement(0, 0);
 	}
 
 	/**
@@ -900,8 +903,7 @@ public class HolonomicDrive
 	 */
 	public double GetYPosition()
 	{
-		//return navigator.GetY();
-		return 0.0;
+		return estimatedRobotPosition.GetElement(1, 0);
 	}
 
 	/**
@@ -911,8 +913,7 @@ public class HolonomicDrive
 	 */
 	public double GetThetaPosition()
 	{
-		//return navigator.GetTheta();
-		return 0.0;
+		return estimatedRobotPosition.GetElement(2, 0);
 	}
 
 	/**

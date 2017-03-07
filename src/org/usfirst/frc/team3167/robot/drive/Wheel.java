@@ -550,6 +550,16 @@ public class Wheel
     {
         return radius;
     }
+    
+    public void UpdateWheelVelocity()
+    {
+    	if (motor != null)
+    		throw new IllegalStateException("Cannot call UpdateWheelVelocity when motor objects exist.");
+    	
+    	double position = encoder.getDistance() / gearRatio * Math.PI / 180.0;// [rad at wheel]
+        wheelVelocity = rateFilter.Apply((position - lastPosition) * freq);
+        lastPosition = position;
+    }
 
 	/**
 	 * Returns the measured velocity of the wheel (not the motor, nor the

@@ -10,6 +10,8 @@ package org.usfirst.frc.team3167.robot.drive;
 
 // Local imports
 import org.usfirst.frc.team3167.robot.util.PIDControllerII;
+import org.usfirst.frc.team3167.robot.util.SecondOrderLimiter;
+import org.usfirst.frc.team3167.robot.Networking;
 
 /**
  * Position controller for a robot with holonomic motion.  Closes independent
@@ -21,25 +23,21 @@ public class HolonomicPositioner
 {
 	// Local fields
 	private final HolonomicDrive drive;
+	private final double frequency;// [Hz]
 
 	private final PIDControllerII xController;
 	private final PIDControllerII yController;
 	private final PIDControllerII thetaController;
 
 	private double xTarget, yTarget, thetaTarget;
-	private final double xTolerance = 1.0;// [in]
+	
+	private final SecondOrderLimiter xLimiter;
+	private final SecondOrderLimiter yLimiter;
+	private final SecondOrderLimiter thetaLimiter;
+	
+	private final double xTolerance = 0.5;// [in]
 	private final double yTolerance = 1.0;// [in]
-	private final double thetaTolerance = 2.5;// [deg]
-
-	private final double kpLinearFine = 5.0;
-	private final double tiLinearFine = 1.0;
-	private final double kpRotaryFine = 0.1;
-	private final double tiRotaryFine = 0.01;
-
-	private final double kpLinearCoarse = 5.0;
-	private final double tiLinearCoarse = 0.02;
-	private final double kpRotaryCoarse = 0.02;
-	private final double tiRotaryCoarse = 0.01;
+	private final double thetaTolerance = 5.0 * Math.PI / 180.0;// [rad]
 
 	// Methods
 	/**
@@ -50,18 +48,34 @@ public class HolonomicPositioner
 	 */
 	public HolonomicPositioner(HolonomicDrive _drive, double freq)
 	{
-		// Assign local fields
 		drive = _drive;
+		frequency = freq;
+		
+		final double kpLinear = 5.0;
+		final double tiLinear = 1.0;
+		final double kpRotary = 0.1;
+		final double tiRotary = 1.0;
 
-		// Create the controllers
 		double integralTime = 2.0;// [sec]
-		xController = new PIDControllerII(0.0, 0.0,
-				(int)(integralTime * freq), freq);
-		yController = new PIDControllerII(0.0, 0.0,
-				(int)(integralTime * freq), freq);
-		thetaController = new PIDControllerII(0.0, 0.0,
-				(int)(integralTime * freq), freq);
-		SetCoarseGains();
+		xController = new PIDControllerII(kpLinear, tiLinear, 0.0, freq);
+		yController = new PIDControllerII(kpLinear, tiLinear, 0.0, freq);
+		thetaController = new PIDControllerII(kpRotary, tiRotary, 0.0, freq);
+		
+		final double linearMaxVel = 10.0;// [in/sec]
+		final double linearMaxAccel = 15.0;// [in/sec^2]
+		final double rotaryMaxVel = 20.0 * Math.PI / 180.0;// [rad/sec]
+		final double rotaryMaxAccel = 20.0 * Math.PI / 180.0;// [rad/sec^2]
+		
+		xLimiter = new SecondOrderLimiter(linearMaxVel, linearMaxAccel, freq);
+		yLimiter = new SecondOrderLimiter(linearMaxVel, linearMaxAccel, freq);
+		thetaLimiter = new SecondOrderLimiter(rotaryMaxVel, rotaryMaxAccel, freq);
+		
+		final double cutoffFrequency = 2.0;// [Hz]
+		final double zeta = 1.0;
+		
+		xLimiter.EnableFiltering(cutoffFrequency, zeta);
+		yLimiter.EnableFiltering(cutoffFrequency, zeta);
+		thetaLimiter.EnableFiltering(cutoffFrequency, zeta);
 	}
 
 	/**
@@ -73,36 +87,58 @@ public class HolonomicPositioner
 		xController.ResetError();
 		yController.ResetError();
 		thetaController.ResetError();
+		
+		lastX = 0.0;
+		lastY = 0.0;
+		lastTheta = 0.0;
+		
+		drive.ResetPositions(lastX, lastY, lastTheta);
+		drive.Reset();
 	}
 
 	/**
-	 * Sets the position reference for each of the three loops.
+	 * Sets the position reference for each of the three loops.  This must be called
+	 * once per loop, even if we don't have new data from the vision processor.  In
+	 * that case, this method should be called with the old data, until new estimates
+	 * are available.
 	 *
 	 * @param x		X position reference
 	 * @param y		Y position reference
-	 * @param theta	Theta positon reference
+	 * @param theta	Theta position reference
 	 */
+	private final double lastX, lastY, lastTheta;
 	public void SetTargetPosition(double x, double y, double theta)
 	{
-		xTarget = x;
-		yTarget = y;
-		thetaTarget = theta;
+		double xVel = (lastX - x) * frequency;
+		double yVel = (lastY - y) * frequency;
+		double thetaVel = (lastTheta - theta) * frequency;
+		
+		xVel = xLimiter.Process(xVel);
+		yVel = yLimiter.Process(yVel);
+		thetaVel = thetaLimiter.Process(thetaVel);
+		
+		xTarget += xVel / frequency;
+		yTarget += yVel / frequency;
+		thetaTarget += thetaVel / frequency;
 	}
 
 	/**
-	 * Closes each position loop independently.
+	 * Closes each position loop independently.  Returns drive commands.
 	 */
-	public void Update()
+	public Networking.RobotPosition Update()
 	{
-		double xCommand = xController.DoControl(xTarget, drive.GetXPosition());
-		double yCommand = yController.DoControl(yTarget, drive.GetYPosition());
-		double omegaCommand = thetaController.DoControl(thetaTarget,
+		drive.UpdateEstimates();
+		
+		Networking.RobotPosition command = new Networking.RobotPosition();
+		command.x = xController.DoControl(xTarget, drive.GetXPosition());
+		command.y = yController.DoControl(yTarget, drive.GetYPosition());
+		command.theta = thetaController.DoControl(thetaTarget,
 				drive.GetThetaPosition());
 
 		// Limit the commands to the max allowed by the drive object to reduce
 		// the effect of one large error resulting in other commands being
 		// ignored
-		if (xCommand > drive.GetMaxXVel())
+		/*if (xCommand > drive.GetMaxXVel())
 			xCommand = drive.GetMaxXVel();
 		else if (xCommand < -drive.GetMaxXVel())
 			xCommand = -drive.GetMaxXVel();
@@ -115,12 +151,9 @@ public class HolonomicPositioner
 		if (omegaCommand > drive.GetMaxOmega())
 			omegaCommand = drive.GetMaxOmega();
 		else if (omegaCommand < -drive.GetMaxOmega())
-			omegaCommand = -drive.GetMaxOmega();
+			omegaCommand = -drive.GetMaxOmega();*/
 
-		System.out.println("xCmd: " + xCommand + "  yCmd: " + yCommand
-				+ "  thetaCmd: " + omegaCommand);
-
-		drive.Drive(xCommand, yCommand, omegaCommand);
+		return command;
 	}
 
 	/**
@@ -139,15 +172,6 @@ public class HolonomicPositioner
 
 		return false;
 	}
-
-	/**
-	 * Prints the position command to the console for debugging.
-	 */
-    public void PrintCommand()
-    {
-        System.out.println("cmd x: " + xTarget + "  cmd y: " + yTarget
-                + "  cmd theta: " + thetaTarget);
-    }
 
 	/**
 	 * Returns the difference between the actual and commanded X positions.
@@ -177,38 +201,6 @@ public class HolonomicPositioner
 	public double GetDeltaTheta()
 	{
 		return drive.GetThetaPosition() - thetaTarget;
-	}
-
-	/**
-	 * Sets controller gains to the set used for rough positioning (large
-	 * errors).
-	 */
-	public final void SetCoarseGains()
-	{
-		xController.SetKp(kpLinearCoarse);
-		xController.SetTi(tiLinearCoarse);
-
-		yController.SetKp(kpLinearCoarse);
-		yController.SetTi(tiLinearCoarse);
-
-		thetaController.SetKp(kpRotaryCoarse);
-		thetaController.SetTi(tiRotaryCoarse);
-	}
-
-	/**
-	 * Sets the controller gains to the set used for fine positioning (small
-	 * errors).
-	 */
-	public final void SetFineGains()
-	{
-		xController.SetKp(kpLinearFine);
-		xController.SetTi(tiLinearFine);
-		
-		yController.SetKp(kpLinearFine);
-		yController.SetTi(tiLinearFine);
-
-		thetaController.SetKp(kpRotaryFine);
-		thetaController.SetTi(tiRotaryFine);
 	}
 }
 

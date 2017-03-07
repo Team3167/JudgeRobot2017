@@ -2,6 +2,7 @@
 package org.usfirst.frc.team3167.robot;
 
 import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
+import org.usfirst.frc.team3167.robot.drive.HolonomicPositioner;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
 import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 
@@ -36,6 +37,7 @@ public class Robot extends IterativeRobot {
     private final int listenForRPiOnPort = 5801;
     private final Networking rpiInterface = new Networking(listenForRPiOnPort);
     
+    private final HolonomicPositioner positioner;
     private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
     
     private final JoystickWrapper stick = new JoystickWrapper(1);
@@ -78,8 +80,9 @@ public class Robot extends IterativeRobot {
     				new Talon(motorLeftRearChannel),
     				new Talon(motorRightFrontChannel),
     				new Talon(motorRightRearChannel));
-    	else
-    		InitializeHolonomicDrive();
+
+    	InitializeHolonomicDrive();
+    	positioner = new HolonomicPositioner(drive, robotFrequency);
     	
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
     	vision = new Vision("cam0");
@@ -134,23 +137,32 @@ public class Robot extends IterativeRobot {
         	SmartDashboard.putNumber("image theta: ", pos.theta);//*/
         }
         
-    	if (useSimpleDrive)
-    	{
-    		/*SmartDashboard.putNumber("Right: ", stick.GetRight());
-        	SmartDashboard.putNumber("Forward: ", stick.GetForward());
-        	SmartDashboard.putNumber("Twist: ", stick.GetTwist());//*/
-    		mecanumDrive.Drive(-stick.GetRight(), -stick.GetForward(), stick.GetTwist());
-    	}
-    	else
-    	{
-    		// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
-    		drive.Drive(stick);
-    		drive.DoSmartDashboardWheelVelocities();
-    	
-    		drive.UpdateGains(Preferences.getInstance().getDouble("kp", 0.02),
-    			Preferences.getInstance().getDouble("ti", 1.0));
-    		//prefs.getDouble("filter", 5.0);
-    	}
+        // This stuff could be put in autoInit() and autoPeriodic() as well
+        if (stick.AutoDriveToGearPeg())
+        	BeginDriveToTarget();
+        
+        if (driveToTarget)
+        	DriveToTarget();
+        else
+        {
+	    	if (useSimpleDrive)
+	    	{
+	    		/*SmartDashboard.putNumber("Right: ", stick.GetRight());
+	        	SmartDashboard.putNumber("Forward: ", stick.GetForward());
+	        	SmartDashboard.putNumber("Twist: ", stick.GetTwist());//*/
+	    		mecanumDrive.Drive(-stick.GetRight(), -stick.GetForward(), stick.GetTwist());
+	    	}
+	    	else
+	    	{
+	    		// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
+	    		drive.Drive(stick);
+	    		drive.DoSmartDashboardWheelVelocities();
+	    	
+	    		drive.UpdateGains(Preferences.getInstance().getDouble("kp", 0.02),
+	    			Preferences.getInstance().getDouble("ti", 1.0));
+	    		//prefs.getDouble("filter", 5.0);
+	    	}
+        }
     	
     	//handle climber (with multiple speeds)
     	//could remove reverse spins (currently just a fail-safe)
@@ -160,6 +172,44 @@ public class Robot extends IterativeRobot {
     	
     	//testDrive.sendDistToDash();
     }
+    
+    // TODO:  Clean this up, make a new class
+    boolean driveToTarget = false;
+    Networking.RobotPosition targetPosition = new Networking.RobotPosition();
+    
+    private void BeginDriveToTarget()
+    {
+    	// TODO:  We should check to make sure we can see the target, otherwise we don't know how to start...
+    	driveToTarget = true;
+    	rpiInterface.FlushBuffer();
+    	
+    	targetPosition.x = 0.0;
+    	targetPosition.y = 0.0;
+    	targetPosition.theta = 0.0;
+    	
+    	positioner.ResetControllers();
+    }
+     
+    private void DriveToTarget()
+    {
+    	if (!driveToTarget)
+    		return;
+    	
+    	if (rpiInterface.GotPositionUpdate())
+    		targetPosition = rpiInterface.GetLatestPosition();
+    	
+    	positioner.SetTargetPosition(targetPosition.x, targetPosition.y, targetPosition.theta);
+    	Networking.RobotPosition command = positioner.Update();
+    	
+    	if (useSimpleDrive)
+    		mecanumDrive.Drive(-command.x, -command.y, command.theta);
+    	else
+    		drive.Drive(command.x, command.y, command.theta);
+    	
+    	if (positioner.AtTargetPosition())
+    		driveToTarget = false;
+    }
+    ////////////// End move to new class
     
     /**
      * This function is called periodically during test mode
@@ -196,6 +246,14 @@ public class Robot extends IterativeRobot {
     	return encoder;
     }
     
+    private Talon CreateNewMotor(int channel)
+    {
+    	if (useSimpleDrive)
+    		return null;
+    	
+    	return new Talon(channle);
+    }
+    
     private boolean InitializeHolonomicDrive()
     {
     	// X is positive right
@@ -219,25 +277,25 @@ public class Robot extends IterativeRobot {
     	
     	// Left front (motor 2)
     	drive.AddWheel(-halfWidth, halfLength, -1.0, 0.0,
-    			rollerAngle, radius, gearRatio, new Talon(motorLeftFrontChannel),
+    			rollerAngle, radius, gearRatio, CreateNewMotor(motorLeftFrontChannel),
     			maxSpeed, CreateNewEncoder(encoderLeftFrontA, encoderLeftFrontB, false, encoding, encoderPPR),
     			kp, ti, saturation, filterOmega, filterZeta);
     	
     	// Right front (motor 4)
     	drive.AddWheel(halfWidth, halfLength, 1.0, 0.0,
-    			-rollerAngle, radius, gearRatio, new Talon(motorRightFrontChannel),
+    			-rollerAngle, radius, gearRatio, CreateNewMotor(motorRightFrontChannel),
     			maxSpeed, CreateNewEncoder(encoderRightFrontA, encoderRightFrontB, false, encoding, encoderPPR),
     			kp, ti, saturation, filterOmega, filterZeta);
     	
     	// Left rear (motor 1)
     	drive.AddWheel(-halfWidth, -halfLength, -1.0, 0.0,
-    			-rollerAngle, radius, gearRatio, new Talon(motorLeftRearChannel),
+    			-rollerAngle, radius, gearRatio, CreateNewMotor(motorLeftRearChannel),
     			maxSpeed, CreateNewEncoder(encoderLeftRearA, encoderLeftRearB, false, encoding, encoderPPR),
     			kp, ti, saturation, filterOmega, filterZeta);
     	
     	// Right rear (motor 3)
     	drive.AddWheel(halfWidth, -halfLength, 1.0, 0.0,
-    			rollerAngle, radius, gearRatio, new Talon(motorRightRearChannel),
+    			rollerAngle, radius, gearRatio, CreateNewMotor(motorRightRearChannel),
     			maxSpeed, CreateNewEncoder(encoderRightRearA, encoderRightRearB, false, encoding, encoderPPR),
     			kp, ti, saturation, filterOmega, filterZeta);
     	
