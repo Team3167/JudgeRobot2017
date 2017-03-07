@@ -3,16 +3,17 @@ package org.usfirst.frc.team3167.robot;
 
 import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
+import org.usfirst.frc.team3167.robot.util.JoystickButton;
 import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -22,20 +23,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * directory.
  */
 public class Robot extends IterativeRobot {
-    final String defaultAuto = "Default";
-    final String customAuto = "My Auto";
-    String autoSelected;
+    String climberCamLoc, gearCamLoc, finalCam;
     SendableChooser chooser;
     
     static final private double robotFrequency = 50.0;// [Hz]
     
     private final boolean useSimpleDrive = true;
     private SimpleMecanumDrive mecanumDrive;
-    private RobotDrive d;
+    //private RobotDrive d;
     
     private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
     
-    private final JoystickWrapper stick = new JoystickWrapper(1);
+    //private final JoystickWrapper stick = new JoystickWrapper(1); 
+    private final Joystick stick = new Joystick(1); 
     
     private Climber climber;
     private RobotConfiguration robotConfig;
@@ -55,6 +55,8 @@ public class Robot extends IterativeRobot {
     static final private int motorLeftRearChannel = 1;
     static final private int motorRightFrontChannel = 4;
     static final private int motorRightRearChannel = 3;
+    
+    private boolean slideLocked = false; 
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -62,9 +64,8 @@ public class Robot extends IterativeRobot {
      */
     public void robotInit() {
         /*chooser = new SendableChooser();
-        chooser.addDefault("Default Auto", defaultAuto);
-        chooser.addObject("My Auto", customAuto);
-        SmartDashboard.putData("Auto choices", chooser);*/
+        chooser.addDefault("gearCam", gearCamLoc);
+        chooser.addObject("climberCam", climberCamLoc); */
    
     	climber = new Climber(1, 2, 5); 
     	robotConfig = new RobotConfiguration(); 
@@ -79,8 +80,9 @@ public class Robot extends IterativeRobot {
     		InitializeHolonomicDrive();
     	
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
-    	vision = new Vision("cam0");
-    	vision.enable();
+    	
+    	vision = new Vision();
+    	//vision.enable();
     }
     
 	/**
@@ -114,24 +116,37 @@ public class Robot extends IterativeRobot {
     }
     
     public void teleopInit() {
-    	drive.Reset(); 
+    	/*(finalCam = chooser.getSelected(); 
+    	vision.enable(finalCam);*/
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
+    	if(stick.getRawButton(11))
+    		vision.enable(gearCamLoc);
+    	else if(stick.getRawButton(12))
+    		vision.enable(climberCamLoc);
+    	
     	if (useSimpleDrive)
     	{
     		/*SmartDashboard.putNumber("Right: ", stick.GetRight());
         	SmartDashboard.putNumber("Forward: ", stick.GetForward());
         	SmartDashboard.putNumber("Twist: ", stick.GetTwist());//*/
-    		mecanumDrive.Drive(-stick.GetRight(), -stick.GetForward(), stick.GetTwist());
+    		
+    		if(stick.getRawButton(2))
+    			slideLocked = true; 
+    		else
+    			slideLocked = false; 
+    			
+    		//mecanumDrive.Drive(-stick.GetRight(), -stick.GetForward(), stick.GetTwist(), slideLocked);	
+    		mecanumDrive.Drive(-stick.getX(), stick.getY(), -stick.getTwist(), slideLocked);
     	}
     	else
     	{
     		// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
-    		drive.Drive(stick);
+    		//drive.Drive(stick);
     		drive.DoSmartDashboardWheelVelocities();
     	
     		drive.UpdateGains(Preferences.getInstance().getDouble("kp", 0.02),
@@ -143,8 +158,8 @@ public class Robot extends IterativeRobot {
     	//could remove reverse spins (currently just a fail-safe)
     	climber.operate(); 
     	
-    	gearHanger.hangGear(0.5);
-    	
+    	gearHanger.hangGear(0.7);
+    	    	
     	//testDrive.sendDistToDash();
     }
     

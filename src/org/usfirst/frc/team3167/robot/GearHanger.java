@@ -10,6 +10,7 @@ public class GearHanger {
 	private Jaguar gearMotor;
 	private Joystick stick, stick2; 
 	private DigitalInput limitSwitchHigh, limitSwitchLow; 
+	private boolean checkSwitchPosition;
 	
 	public GearHanger(int joystickPort, int joystick2Port, int motorPort, int limitHighPort, int limitLowPort) {
 		stick = new Joystick(joystickPort);
@@ -17,6 +18,7 @@ public class GearHanger {
 		gearMotor = new Jaguar(motorPort); 		
 		limitSwitchHigh = new DigitalInput(limitHighPort); 
 		limitSwitchLow = new DigitalInput(limitLowPort); 
+		checkSwitchPosition = false; 
 	}
 	
 	public void hangGear(double hookSpeed) {
@@ -36,6 +38,7 @@ public class GearHanger {
 			gearMotor.set(liftSpeed);
 			hookMsg = "Lifting hook";
 			povMsg = "Forward";
+			checkSwitchPosition = false; 
 			
 			if(!limitSwitchHigh.get()) {
 				gearMotor.set(stop);
@@ -44,6 +47,7 @@ public class GearHanger {
 				if(stick.getPOV() == reversePos || stick2.getPOV() == reversePos) {
 					gearMotor.set(lowerSpeed);
 					hookMsg = "Lowering hook";
+					checkSwitchPosition = true; 
 					povMsg = "Reverse";
 				}
 			}
@@ -52,6 +56,7 @@ public class GearHanger {
 			gearMotor.set(lowerSpeed);
 			hookMsg = "Lowering hook";
 			povMsg = "Reverse";
+			checkSwitchPosition = true; 
 			
 			if(!limitSwitchLow.get()) {
 				gearMotor.set(stop);
@@ -61,6 +66,7 @@ public class GearHanger {
 					gearMotor.set(liftSpeed);
 					hookMsg = "Lifting hook";
 					povMsg = "Forward";
+					checkSwitchPosition = false; 
 				}
 			}
 		} else {
@@ -72,6 +78,7 @@ public class GearHanger {
 		SmartDashboard.putString("Gear function: ", hookMsg);
 		SmartDashboard.putString("Microswitch Function: ", switchMsg);
 		SmartDashboard.putString("POV Position: ", povMsg);
+		SmartDashboard.putBoolean("gearDown ", checkSwitchPosition);
 	}
 
 }
