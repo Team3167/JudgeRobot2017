@@ -1,4 +1,6 @@
-package org.usfirst.frc.team3167.robot;
+package org.usfirst.frc.team3167.objectcontrol;
+
+import org.usfirst.frc.team3167.robot.RobotConfiguration;
 
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;

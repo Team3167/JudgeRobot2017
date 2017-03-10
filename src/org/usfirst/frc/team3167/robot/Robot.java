@@ -1,6 +1,10 @@
 
 package org.usfirst.frc.team3167.robot;
 
+import org.usfirst.frc.team3167.autonomous.DriveStraightAuto;
+import org.usfirst.frc.team3167.autonomous.Vision;
+import org.usfirst.frc.team3167.objectcontrol.Climber;
+import org.usfirst.frc.team3167.objectcontrol.GearHanger;
 import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
 import org.usfirst.frc.team3167.robot.util.JoystickButton;
@@ -42,6 +46,7 @@ public class Robot extends IterativeRobot {
     private RobotConfiguration robotConfig;
     private Vision vision; 
     private GearHanger gearHanger;
+    private DriveStraightAuto auto; 
     
     static final private int encoderLeftFrontA = 16;
     static final private int encoderLeftFrontB = 17;
@@ -56,6 +61,9 @@ public class Robot extends IterativeRobot {
     static final private int motorLeftRearChannel = 1;
     static final private int motorRightFrontChannel = 4;
     static final private int motorRightRearChannel = 3;
+    
+    static final private double autoDriveTime = 4.0; //[sec]
+    static final private double autoDriveSpeed = 0.8;  
     
     private boolean slideLocked = false; 
 	
@@ -81,6 +89,8 @@ public class Robot extends IterativeRobot {
     		InitializeHolonomicDrive();
     	
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
+    	
+    	auto = new DriveStraightAuto(mecanumDrive, autoDriveSpeed, autoDriveTime);
     	
     	vision = new Vision();
     	vision.enable("cam0");
@@ -114,6 +124,8 @@ public class Robot extends IterativeRobot {
     	//Put default auto code here
             break;
     	}*/
+    	
+    	auto.execute(); 
     }
     
     public void teleopInit() {

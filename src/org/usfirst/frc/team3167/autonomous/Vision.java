@@ -1,4 +1,4 @@
-package org.usfirst.frc.team3167.robot;
+package org.usfirst.frc.team3167.autonomous;
 
 import edu.wpi.first.wpilibj.CameraServer;
 
