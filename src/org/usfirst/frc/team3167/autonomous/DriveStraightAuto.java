@@ -2,6 +2,7 @@ package org.usfirst.frc.team3167.autonomous;
 
 import org.usfirst.frc.team3167.objectcontrol.GearHanger;
 import org.usfirst.frc.team3167.robot.RobotConfiguration;
+import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
 
 public class DriveStraightAuto {
@@ -14,6 +15,7 @@ public class DriveStraightAuto {
 	
 	private final SimpleMecanumDrive drive;
 	private final GearHanger gearHanger; 
+	private final HolonomicDrive holoDrive;
 	
 	// Can't use a standard java timer in a real-time application
 	// We'll keep track of time on our own
@@ -21,9 +23,10 @@ public class DriveStraightAuto {
 	
 	private final double hookSpeed = 0.7; 
 	
-	public DriveStraightAuto(SimpleMecanumDrive drive, GearHanger gearHanger) {
+	public DriveStraightAuto(SimpleMecanumDrive drive, GearHanger gearHanger, HolonomicDrive holoDrive) {
 		this.drive = drive;
 		this.gearHanger = gearHanger;
+		this.holoDrive = holoDrive;
 		resetTime(); 
 	}
 	
@@ -111,11 +114,13 @@ public class DriveStraightAuto {
 		
 		lastState = state;
 		elapsedTime += RobotConfiguration.timeStep;
+		System.out.println("et = " + elapsedTime + "; state = " + state + "; y = " + holoDrive.GetYPosition());
 	}
 	
 	public void resetTime() {
 		elapsedTime = 0.0;
 		state = State.DriveForwardFast;
 		lastState = state;
+		holoDrive.Reset();
 	}
 }

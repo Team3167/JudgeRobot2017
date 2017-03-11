@@ -872,6 +872,7 @@ public class HolonomicDrive
             wheelList.Get(i).Reset();
 
 		SetPosition(0.0, 0.0, 0.0);
+		ResetPositions(0.0, 0.0, 0.0);
     }
 
 	/**

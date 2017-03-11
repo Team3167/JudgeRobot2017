@@ -108,7 +108,7 @@ public class Robot extends IterativeRobot {
     	
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
     	
-    	auto = new DriveStraightAuto(mecanumDrive, gearHanger);
+    	auto = new DriveStraightAuto(mecanumDrive, gearHanger, drive);
     	
     	//joystick, gearPort, climberPort
     	vision = new Vision(stick, 0, 1);
@@ -147,6 +147,7 @@ public class Robot extends IterativeRobot {
             break;
     	}*/
     	
+    	drive.UpdateEstimates();
     	auto.execute(); 
     }
     
