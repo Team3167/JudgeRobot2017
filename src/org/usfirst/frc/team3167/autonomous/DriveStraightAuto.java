@@ -21,12 +21,15 @@ public class DriveStraightAuto {
 	}
 
 	public void execute() {
-		
 		if (elapsedTime < driveTime) {
 			drive.Drive(0.0, autoSpeed, 0.0, false);
 			elapsedTime += RobotConfiguration.timeStep;
 		} else {
 			drive.Drive(0.0, 0.0, 0.0, false);
 		}
+	}
+	
+	public void resetTime() {
+		elapsedTime = 0.0; 
 	}
 }

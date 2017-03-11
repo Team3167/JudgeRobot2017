@@ -40,7 +40,8 @@ public class Robot extends IterativeRobot {
     private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
     
     //private final JoystickWrapper stick = new JoystickWrapper(1); 
-    private final Joystick stick = new Joystick(1); 
+    private Joystick stick;
+    private Joystick stick2; 
     
     private Climber climber;
     private RobotConfiguration robotConfig;
@@ -62,8 +63,8 @@ public class Robot extends IterativeRobot {
     static final private int motorRightFrontChannel = 4;
     static final private int motorRightRearChannel = 3;
     
-    static final private double autoDriveTime = 4.0; //[sec]
-    static final private double autoDriveSpeed = 0.8;  
+    static final private double autoDriveTime = -4.0; //[sec]
+    static final private double autoDriveSpeed = 0.85;  
     
     private boolean slideLocked = false; 
 	
@@ -75,7 +76,10 @@ public class Robot extends IterativeRobot {
         /*chooser = new SendableChooser();
         chooser.addDefault("gearCam", gearCamLoc);
         chooser.addObject("climberCam", climberCamLoc); */
-   
+    	
+    	stick = new Joystick(1); 
+    	stick2 = new Joystick(2); 
+    	
     	climber = new Climber(1, 2, 5); 
     	robotConfig = new RobotConfiguration(); 
  
@@ -92,8 +96,8 @@ public class Robot extends IterativeRobot {
     	
     	auto = new DriveStraightAuto(mecanumDrive, autoDriveSpeed, autoDriveTime);
     	
-    	vision = new Vision();
-    	vision.enable("cam0");
+    	vision = new Vision(stick, 0, 1);
+    	vision.enable();
     }
     
 	/**
@@ -107,8 +111,11 @@ public class Robot extends IterativeRobot {
 	 */
     public void autonomousInit() {
     	/*autoSelected = (String) chooser.getSelected();
-//		autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
+		//autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);*/
+    	
+    	//auto = new DriveStraightAuto(mecanumDrive, autoDriveSpeed, autoDriveTime);
+    	auto.resetTime();
     }
 
     /**
@@ -130,7 +137,7 @@ public class Robot extends IterativeRobot {
     
     public void teleopInit() {
     	drive.Reset();
-    	vision.enable("cam0");
+    	//vision.enable(0);
     }
 
     /**
