@@ -24,6 +24,7 @@ public class GearHanger {
 	public void hangGear(double hookSpeed) {
 		double liftSpeed = -hookSpeed;
 		double lowerSpeed = hookSpeed; 
+		double autoLowerSpeed = hookSpeed;
 		double stop = 0.0; 
 		
 		int forwardPos = 0;
@@ -34,13 +35,15 @@ public class GearHanger {
 		String switchMsg = "";
 		String povMsg = ""; 
 		
+		checkStatus(); 
+		
 		if(stick.getPOV() == forwardPos || stick2.getPOV() == forwardPos) {
 			gearMotor.set(liftSpeed);
 			hookMsg = "Lifting hook";
 			povMsg = "Forward";
 			checkSwitchPosition = false; 
 			
-			if(!limitSwitchHigh.get()) {
+			if(hookIsUp()) {
 				gearMotor.set(stop);
 				switchMsg = "High pressed";
 				
@@ -58,7 +61,7 @@ public class GearHanger {
 			povMsg = "Reverse";
 			checkSwitchPosition = true; 
 			
-			if(!limitSwitchLow.get()) {
+			if(hookIsDown()) {
 				gearMotor.set(stop);
 				switchMsg = "Low pressed";
 				
@@ -79,6 +82,66 @@ public class GearHanger {
 		SmartDashboard.putString("Microswitch Function: ", switchMsg);
 		SmartDashboard.putString("POV Position: ", povMsg);
 		SmartDashboard.putBoolean("gearDown ", checkSwitchPosition);
+	}
+	private int hookDownCount = 0;
+	private int hookUpCount = 0; 
+	private final int switchCountLimit = 5;
+	private boolean hookIsUp = false;
+	private boolean hookIsDown = false; 
+	
+	public  void gearHangAuto(double hookSpeed) {
+		double lowerSpeed = hookSpeed;
+		String autoStr = ""; 		
+		
+		checkStatus(); 
+		if(hookIsDown() && hookSpeed > 0) {
+			gearMotor.set(0.0);
+			autoStr = "at low point";
+		} 
+		else if(hookIsUp() && hookSpeed < 0) {
+			gearMotor.set(0.0);
+			autoStr = "at high point";
+		} else {
+			gearMotor.set(lowerSpeed);
+			autoStr = "lowering hook";
+		}
+		
+		SmartDashboard.putBoolean("limitSwitchLow: ", !limitSwitchLow.get());
+		SmartDashboard.putString("auto hook: ", autoStr);
+	}
+	
+	public boolean hookIsDown() {
+		return hookIsDown; 
+	}
+	
+	public boolean hookIsUp() { 
+		return hookIsUp; 
+	}
+	
+	private void checkStatus() {
+		// Increment counter if switch is NOT depressed
+		if(limitSwitchLow.get()) {
+			hookDownCount++;
+		}
+		else
+			hookDownCount = 0;
+		
+		if (hookDownCount == 0)
+			hookIsDown = true;
+		else if (hookDownCount > switchCountLimit)
+			hookIsDown = false;
+		
+		// Increment counter if switch is NOT depressed
+		if(limitSwitchHigh.get()) {
+			hookUpCount++;
+		}
+		else
+			hookUpCount = 0;
+		
+		if (hookUpCount == 0)
+			hookIsUp = true;
+		else if (hookUpCount > switchCountLimit)
+			hookIsUp = false;
 	}
 
 }
