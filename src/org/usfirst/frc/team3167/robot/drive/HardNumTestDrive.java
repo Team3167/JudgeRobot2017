@@ -1,4 +1,4 @@
-package org.usfirst.frc.team3167.robot;
+package org.usfirst.frc.team3167.robot.drive;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class TestDriveHARDNUMBERS {
+public class HardNumTestDrive {
 	
 	private Joystick stick = new Joystick(1);
 	private Talon motor1;
@@ -27,7 +27,7 @@ public class TestDriveHARDNUMBERS {
 	 * IMPORTANT TO NOTE: Motor 2 and Motor 1 are wired opposite internally.
 	 */
     
-    public TestDriveHARDNUMBERS(int motor1P, int motor2P, int motor3P, int motor4P, int encoder1A, int encoder1B,
+    public HardNumTestDrive(int motor1P, int motor2P, int motor3P, int motor4P, int encoder1A, int encoder1B,
     		int encoder2A, int encoder2B, int encoder3A, int encoder3B, int encoder4A, int encoder4B) {
     	
     	motor1 = new Talon(motor1P); 
@@ -46,7 +46,7 @@ public class TestDriveHARDNUMBERS {
         encoder4.setDistancePerPulse(360.0 / 1024.0);
     }
     
-    public TestDriveHARDNUMBERS(int motor1P, int motor2P, int motor3P, int motor4P) {
+    public HardNumTestDrive(int motor1P, int motor2P, int motor3P, int motor4P) {
     	motor1 = new Talon(motor1P);
     	motor2 = new Talon(motor2P); 
     	motor3 = new Talon(motor3P); 

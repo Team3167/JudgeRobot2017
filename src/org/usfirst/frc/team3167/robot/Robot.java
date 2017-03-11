@@ -1,19 +1,26 @@
 
 package org.usfirst.frc.team3167.robot;
 
+import org.usfirst.frc.team3167.autonomous.DriveStraightAuto;
+import org.usfirst.frc.team3167.autonomous.Networking;
+import org.usfirst.frc.team3167.autonomous.Vision;
+import org.usfirst.frc.team3167.objectcontrol.Climber;
+import org.usfirst.frc.team3167.objectcontrol.GearHanger;
 import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import org.usfirst.frc.team3167.robot.drive.HolonomicPositioner;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
+import org.usfirst.frc.team3167.robot.util.JoystickButton;
 import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -23,16 +30,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * directory.
  */
 public class Robot extends IterativeRobot {
-    final String defaultAuto = "Default";
-    final String customAuto = "My Auto";
-    String autoSelected;
-    SendableChooser chooser;
+    //String climberCamLoc, gearCamLoc, finalCam;
+    //SendableChooser chooser;
     
     static final private double robotFrequency = 50.0;// [Hz]
     
     private final boolean useSimpleDrive = true;
     private SimpleMecanumDrive mecanumDrive;
-    private RobotDrive d;
+    //private RobotDrive d;
     
     private final int listenForRPiOnPort = 5801;
     private final Networking rpiInterface = new Networking(listenForRPiOnPort);
@@ -40,12 +45,15 @@ public class Robot extends IterativeRobot {
     private final HolonomicPositioner positioner;
     private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
     
-    private final JoystickWrapper stick = new JoystickWrapper(1);
+    //private final JoystickWrapper stick = new JoystickWrapper(1); 
+    private Joystick stick;
+    private Joystick stick2; 
     
     private Climber climber;
     private RobotConfiguration robotConfig;
     private Vision vision; 
     private GearHanger gearHanger;
+    private DriveStraightAuto auto; 
     
     static final private int encoderLeftFrontA = 16;
     static final private int encoderLeftFrontB = 17;
@@ -59,7 +67,9 @@ public class Robot extends IterativeRobot {
     static final private int motorLeftFrontChannel = 2;
     static final private int motorLeftRearChannel = 1;
     static final private int motorRightFrontChannel = 4;
-    static final private int motorRightRearChannel = 3;
+    static final private int motorRightRearChannel = 3; 
+    
+    private boolean slideLocked = false; 
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -67,10 +77,12 @@ public class Robot extends IterativeRobot {
      */
     public void robotInit() {
         /*chooser = new SendableChooser();
-        chooser.addDefault("Default Auto", defaultAuto);
-        chooser.addObject("My Auto", customAuto);
-        SmartDashboard.putData("Auto choices", chooser);*/
-   
+        chooser.addDefault("gearCam", gearCamLoc);
+        chooser.addObject("climberCam", climberCamLoc); */
+    	
+    	stick = new Joystick(1); 
+    	stick2 = new Joystick(2); 
+    	
     	climber = new Climber(1, 2, 5); 
     	robotConfig = new RobotConfiguration(); 
  
@@ -85,7 +97,11 @@ public class Robot extends IterativeRobot {
     	positioner = new HolonomicPositioner(drive, robotFrequency);
     	
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
-    	vision = new Vision("cam0");
+    	
+    	auto = new DriveStraightAuto(mecanumDrive, gearHanger);
+    	
+    	//joystick, gearPort, climberPort
+    	vision = new Vision(stick, 0, 1);
     	vision.enable();
     }
     
@@ -100,8 +116,11 @@ public class Robot extends IterativeRobot {
 	 */
     public void autonomousInit() {
     	/*autoSelected = (String) chooser.getSelected();
-//		autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
+		//autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
 		System.out.println("Auto selected: " + autoSelected);*/
+    	
+    	//auto = new DriveStraightAuto(mecanumDrive, autoDriveSpeed, autoDriveTime);
+    	auto.resetTime();
     }
 
     /**
@@ -117,15 +136,19 @@ public class Robot extends IterativeRobot {
     	//Put default auto code here
             break;
     	}*/
+    	
+    	auto.execute(); 
     }
     
     public void teleopInit() {
     	drive.Reset();
+    	//vision.enable(0);
     }
 
     /**
      * This function is called periodically during operator control
      */
+<<<<<<< HEAD
     public void teleopPeriodic() {
         if (rpiInterface.GotPositionUpdate())
         {
@@ -163,13 +186,40 @@ public class Robot extends IterativeRobot {
 	    		//prefs.getDouble("filter", 5.0);
 	    	}
         }
+=======
+    public void teleopPeriodic() {    	
+    	if (useSimpleDrive)
+    	{
+    		/*SmartDashboard.putNumber("Right: ", stick.GetRight());
+        	SmartDashboard.putNumber("Forward: ", stick.GetForward());
+        	SmartDashboard.putNumber("Twist: ", stick.GetTwist());//*/
+    		
+    		if(stick.getRawButton(2))
+    			slideLocked = true; 
+    		else
+    			slideLocked = false; 
+    			
+    		//mecanumDrive.Drive(-stick.GetRight(), -stick.GetForward(), stick.GetTwist(), slideLocked);	
+    		mecanumDrive.Drive(-stick.getX(), stick.getY(), -stick.getTwist(), slideLocked);
+    	}
+    	else
+    	{
+    		// We should maybe use SecondOrderLimiters to prevent inputs from being too aggressive
+    		//drive.Drive(stick);
+    		drive.DoSmartDashboardWheelVelocities();
+    	
+    		drive.UpdateGains(Preferences.getInstance().getDouble("kp", 0.02),
+    			Preferences.getInstance().getDouble("ti", 1.0));
+    		//prefs.getDouble("filter", 5.0);
+    	}
+>>>>>>> Westtown
     	
     	//handle climber (with multiple speeds)
     	//could remove reverse spins (currently just a fail-safe)
     	climber.operate(); 
     	
-    	gearHanger.hangGear(0.5);
-    	
+    	gearHanger.hangGear(0.7);
+    	    	
     	//testDrive.sendDistToDash();
     }
     

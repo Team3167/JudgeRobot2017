@@ -1,4 +1,6 @@
-package org.usfirst.frc.team3167.robot;
+package org.usfirst.frc.team3167.objectcontrol;
+
+import org.usfirst.frc.team3167.robot.RobotConfiguration;
 
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Joystick;
@@ -57,10 +59,11 @@ public class Climber {
     		slowSpin();
     		msg = "Slow spin";
     	}
-    	else if(stick.getRawButton(2) || stick2.getRawButton(2)) {
+    	//BUTTON TWO NOW USED FOR SLIDE LOCK
+    	/*else if(stick.getRawButton(2) || stick2.getRawButton(2)) {
     		slowSpinReverse();
     		msg = "Slow spin (R)";
-    	}
+    	}*/
     	else if(stick.getRawButton(5) || stick2.getRawButton(5)) {
     		mediumSpin();
     		msg = "Medium spin";
