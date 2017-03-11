@@ -29,7 +29,6 @@ public class Vision {
 		
 		gearServer.startAutomaticCapture(gearCamChannel);
 		climberServer.startAutomaticCapture(climberCamChannel);
-		
 	}
 	//OUTDATED
 	/*public void setClimberDetails() {

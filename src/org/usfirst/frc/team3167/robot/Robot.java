@@ -63,8 +63,8 @@ public class Robot extends IterativeRobot {
     static final private int motorRightFrontChannel = 4;
     static final private int motorRightRearChannel = 3;
     
-    static final private double autoDriveTime = -4.0; //[sec]
-    static final private double autoDriveSpeed = 0.85;  
+    static final private double autoDriveTime = 0.9; //[sec]
+    static final private double autoDriveSpeed = 0.75;  
     
     private boolean slideLocked = false; 
 	
@@ -96,6 +96,7 @@ public class Robot extends IterativeRobot {
     	
     	auto = new DriveStraightAuto(mecanumDrive, autoDriveSpeed, autoDriveTime);
     	
+    	//joystick, gearPort, climberPort
     	vision = new Vision(stick, 0, 1);
     	vision.enable();
     }
