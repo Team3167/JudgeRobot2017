@@ -60,7 +60,8 @@ public class Robot extends IterativeRobot {
     
     static final private int motorLeftFrontChannel = 2;
     static final private int motorLeftRearChannel = 1;
-    static final private int motorRightFrontChannel = 4; 
+    static final private int motorRightFrontChannel = 4;
+    static final private int motorRightRearChannel = 3; 
     
     private boolean slideLocked = false; 
 	

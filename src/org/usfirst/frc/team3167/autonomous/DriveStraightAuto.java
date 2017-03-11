@@ -4,9 +4,6 @@ import org.usfirst.frc.team3167.objectcontrol.GearHanger;
 import org.usfirst.frc.team3167.robot.RobotConfiguration;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 public class DriveStraightAuto {
 	private final double fastSpeed = 0.75;
 	private final double slowSpeed = 0.3;
@@ -42,6 +39,7 @@ public class DriveStraightAuto {
 	}
 	
 	private State state;
+	private State lastState;
 
 	public void execute() {	
 		switch (state)
@@ -52,7 +50,6 @@ public class DriveStraightAuto {
 			if (elapsedTime >= driveFastTime)
 			{
 				state = State.DriveForwardSlow;
-				elapsedTime = 0.0;
 			}
 			break;
 			
@@ -62,7 +59,6 @@ public class DriveStraightAuto {
 			if (elapsedTime >= driveSlowTime)
 			{
 				state = State.PauseBeforeHang;
-				elapsedTime = 0.0;
 			}
 			break;
 			
@@ -72,7 +68,6 @@ public class DriveStraightAuto {
 			if (elapsedTime >= pauseTime)
 			{
 				state = State.HangGear;
-				elapsedTime = 0.0;
 			}
 			break;
 			
@@ -83,7 +78,6 @@ public class DriveStraightAuto {
 			if (gearHanger.hookIsDown())
 			{
 				state = State.PauseAfterHang;
-				elapsedTime = 0.0;
 			}
 			break;
 			
@@ -93,7 +87,6 @@ public class DriveStraightAuto {
 			if (elapsedTime >= pauseTime)
 			{
 				state = State.Reverse;
-				elapsedTime = 0.0;
 			}
 			break;
 			
@@ -110,11 +103,19 @@ public class DriveStraightAuto {
 			break;
 		}
 		
+		// Reset timer for all state changes
+		if (state != lastState)
+		{
+			elapsedTime = 0.0;
+		}
+		
+		lastState = state;
 		elapsedTime += RobotConfiguration.timeStep;
 	}
 	
 	public void resetTime() {
 		elapsedTime = 0.0;
 		state = State.DriveForwardFast;
+		lastState = state;
 	}
 }
