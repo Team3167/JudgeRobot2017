@@ -271,7 +271,8 @@ public class Wheel
         axisX = _axisX / axisMag;
         axisY = _axisY / axisMag;
 
-        motor.set(0.0);
+        if (motor != null)
+        	motor.set(0.0);
 
         // Create controller object
         controller = new PIDControllerII(Kp, Ti, saturation, freq);
@@ -349,7 +350,8 @@ public class Wheel
         axisX = _axisX / axisMag;
         axisY = _axisY / axisMag;
 
-        motor.set(0.0);
+        if (motor != null)
+        	motor.set(0.0);
 
         // Create controller object
         controller = new PIDControllerII(Kp, Ti, Kd,
@@ -428,7 +430,8 @@ public class Wheel
         axisX = _axisX / axisMag;
         axisY = _axisY / axisMag;
 
-        motor.set(0.0);
+        if (motor != null)
+        	motor.set(0.0);
 
         // Create controller object
         controller = new PIDControllerII(Kp, Ti, Kd,
