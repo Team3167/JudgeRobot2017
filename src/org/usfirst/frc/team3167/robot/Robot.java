@@ -8,6 +8,7 @@ import org.usfirst.frc.team3167.objectcontrol.Climber;
 import org.usfirst.frc.team3167.objectcontrol.GearHanger;
 import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import org.usfirst.frc.team3167.robot.drive.HolonomicPositioner;
+import org.usfirst.frc.team3167.robot.drive.RobotPosition;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
 import org.usfirst.frc.team3167.robot.util.JoystickButton;
 import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
@@ -40,9 +41,9 @@ public class Robot extends IterativeRobot {
     //private RobotDrive d;
     
     private final int listenForRPiOnPort = 5801;
-    private final Networking rpiInterface = new Networking(listenForRPiOnPort);
+    private Networking rpiInterface;
     
-    private final HolonomicPositioner positioner;
+    private HolonomicPositioner positioner;
     private final HolonomicDrive drive = new HolonomicDrive(robotFrequency);
     
     //private final JoystickWrapper stick = new JoystickWrapper(1); 
@@ -93,6 +94,15 @@ public class Robot extends IterativeRobot {
     				new Talon(motorRightFrontChannel),
     				new Talon(motorRightRearChannel));
 
+    	try
+    	{
+    		rpiInterface = new Networking(listenForRPiOnPort);
+    	}
+    	catch (Exception e)
+    	{
+    		System.out.println(e.toString());
+    	}
+    	
     	InitializeHolonomicDrive();
     	positioner = new HolonomicPositioner(drive, robotFrequency);
     	
@@ -148,7 +158,7 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during operator control
      */
-<<<<<<< HEAD
+/*<<<<<<< HEAD
     public void teleopPeriodic() {
         if (rpiInterface.GotPositionUpdate())
         {
@@ -157,7 +167,7 @@ public class Robot extends IterativeRobot {
             Networking.RobotPosition pos = rpiInterface.GetLatestPosition();
             SmartDashboard.putNumber("image x: ", pos.x);
         	SmartDashboard.putNumber("image y: ", pos.y);
-        	SmartDashboard.putNumber("image theta: ", pos.theta);//*/
+        	SmartDashboard.putNumber("image theta: ", pos.theta);
         }
         
         // This stuff could be put in autoInit() and autoPeriodic() as well
@@ -170,9 +180,9 @@ public class Robot extends IterativeRobot {
         {
 	    	if (useSimpleDrive)
 	    	{
-	    		/*SmartDashboard.putNumber("Right: ", stick.GetRight());
-	        	SmartDashboard.putNumber("Forward: ", stick.GetForward());
-	        	SmartDashboard.putNumber("Twist: ", stick.GetTwist());//*/
+	    		//SmartDashboard.putNumber("Right: ", stick.GetRight());
+	        	//SmartDashboard.putNumber("Forward: ", stick.GetForward());
+	        	//SmartDashboard.putNumber("Twist: ", stick.GetTwist());
 	    		mecanumDrive.Drive(-stick.GetRight(), -stick.GetForward(), stick.GetTwist());
 	    	}
 	    	else
@@ -186,7 +196,7 @@ public class Robot extends IterativeRobot {
 	    		//prefs.getDouble("filter", 5.0);
 	    	}
         }
-=======
+=======*/
     public void teleopPeriodic() {    	
     	if (useSimpleDrive)
     	{
@@ -212,7 +222,7 @@ public class Robot extends IterativeRobot {
     			Preferences.getInstance().getDouble("ti", 1.0));
     		//prefs.getDouble("filter", 5.0);
     	}
->>>>>>> Westtown
+//>>>>>>> Westtown
     	
     	//handle climber (with multiple speeds)
     	//could remove reverse spins (currently just a fail-safe)
@@ -225,7 +235,7 @@ public class Robot extends IterativeRobot {
     
     // TODO:  Clean this up, make a new class
     boolean driveToTarget = false;
-    Networking.RobotPosition targetPosition = new Networking.RobotPosition();
+    RobotPosition targetPosition = new RobotPosition();
     
     private void BeginDriveToTarget()
     {
@@ -249,10 +259,10 @@ public class Robot extends IterativeRobot {
     		targetPosition = rpiInterface.GetLatestPosition();
     	
     	positioner.SetTargetPosition(targetPosition.x, targetPosition.y, targetPosition.theta);
-    	Networking.RobotPosition command = positioner.Update();
+    	RobotPosition command = positioner.Update();
     	
     	if (useSimpleDrive)
-    		mecanumDrive.Drive(-command.x, -command.y, command.theta);
+    		mecanumDrive.Drive(-command.x, -command.y, command.theta, false);
     	else
     		drive.Drive(command.x, command.y, command.theta);
     	
@@ -301,7 +311,7 @@ public class Robot extends IterativeRobot {
     	if (useSimpleDrive)
     		return null;
     	
-    	return new Talon(channle);
+    	return new Talon(channel);
     }
     
     private boolean InitializeHolonomicDrive()

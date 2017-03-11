@@ -11,7 +11,7 @@ package org.usfirst.frc.team3167.robot.drive;
 // Local imports
 import org.usfirst.frc.team3167.robot.util.PIDControllerII;
 import org.usfirst.frc.team3167.robot.util.SecondOrderLimiter;
-import org.usfirst.frc.team3167.robot.Networking;
+import org.usfirst.frc.team3167.autonomous.Networking;
 
 /**
  * Position controller for a robot with holonomic motion.  Closes independent
@@ -106,7 +106,7 @@ public class HolonomicPositioner
 	 * @param y		Y position reference
 	 * @param theta	Theta position reference
 	 */
-	private final double lastX, lastY, lastTheta;
+	private double lastX, lastY, lastTheta;
 	public void SetTargetPosition(double x, double y, double theta)
 	{
 		double xVel = (lastX - x) * frequency;
@@ -125,11 +125,11 @@ public class HolonomicPositioner
 	/**
 	 * Closes each position loop independently.  Returns drive commands.
 	 */
-	public Networking.RobotPosition Update()
+	public RobotPosition Update()
 	{
 		drive.UpdateEstimates();
 		
-		Networking.RobotPosition command = new Networking.RobotPosition();
+		RobotPosition command = new RobotPosition();
 		command.x = xController.DoControl(xTarget, drive.GetXPosition());
 		command.y = yController.DoControl(yTarget, drive.GetYPosition());
 		command.theta = thetaController.DoControl(thetaTarget,

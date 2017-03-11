@@ -8,14 +8,10 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import org.usfirst.frc.team3167.robot.drive.RobotPosition;
 
 public class Networking {
 	
-	public class RobotPosition {
-	    public double x, y;// [inches]
-	    public double theta;// [rad]
-	}
-
     private final byte[] buffer = new byte[128];
 
     private final DatagramSocket socket;
