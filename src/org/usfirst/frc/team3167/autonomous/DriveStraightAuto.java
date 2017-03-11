@@ -48,7 +48,7 @@ public class DriveStraightAuto {
 		switch (state)
 		{
 		case DriveForwardFast:
-			drive.Drive(0.0, -fastSpeed, 0.0055, false);
+			drive.Drive(0.0, -fastSpeed, 0.0075, false);
 			
 			if (elapsedTime >= driveFastTime)
 			{
@@ -57,7 +57,7 @@ public class DriveStraightAuto {
 			break;
 			
 		case DriveForwardSlow:
-			drive.Drive(0.0, -slowSpeed, 0.0055 * slowSpeed / fastSpeed, false);
+			drive.Drive(0.0, -slowSpeed, 0.0075 * slowSpeed / fastSpeed, false);
 			
 			if (elapsedTime >= driveSlowTime)
 			{

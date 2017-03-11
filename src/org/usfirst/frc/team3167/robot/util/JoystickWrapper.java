@@ -31,6 +31,6 @@ public class JoystickWrapper {
 	
 	public boolean AutoDriveToGearPeg()
 	{
-		driveToGearPegButton.HasJustBeenPressed();
+		return driveToGearPegButton.HasJustBeenPressed();
 	}
 }
