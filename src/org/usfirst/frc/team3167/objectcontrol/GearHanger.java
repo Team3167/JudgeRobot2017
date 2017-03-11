@@ -24,7 +24,6 @@ public class GearHanger {
 	public void hangGear(double hookSpeed) {
 		double liftSpeed = -hookSpeed;
 		double lowerSpeed = hookSpeed; 
-		double autoLowerSpeed = hookSpeed;
 		double stop = 0.0; 
 		
 		int forwardPos = 0;

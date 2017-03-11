@@ -1,8 +1,6 @@
 package org.usfirst.frc.team3167.robot.drive;
 
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.SpeedController;
-import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SimpleMecanumDrive {

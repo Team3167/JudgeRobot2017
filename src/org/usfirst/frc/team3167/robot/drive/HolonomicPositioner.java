@@ -11,7 +11,6 @@ package org.usfirst.frc.team3167.robot.drive;
 // Local imports
 import org.usfirst.frc.team3167.robot.util.PIDControllerII;
 import org.usfirst.frc.team3167.robot.util.SecondOrderLimiter;
-import org.usfirst.frc.team3167.autonomous.Networking;
 
 /**
  * Position controller for a robot with holonomic motion.  Closes independent
@@ -56,7 +55,7 @@ public class HolonomicPositioner
 		final double kpRotary = 0.1;
 		final double tiRotary = 1.0;
 
-		double integralTime = 2.0;// [sec]
+		//double integralTime = 2.0;// [sec]
 		xController = new PIDControllerII(kpLinear, tiLinear, 0.0, freq);
 		yController = new PIDControllerII(kpLinear, tiLinear, 0.0, freq);
 		thetaController = new PIDControllerII(kpRotary, tiRotary, 0.0, freq);
