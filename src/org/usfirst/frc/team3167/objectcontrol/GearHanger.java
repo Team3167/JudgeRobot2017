@@ -7,8 +7,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class GearHanger {
 	
+	/*
+	 * TODO: 
+	 * 	- Remove joysticks from this class. Structure so this can be used in both autonomous and teleop. 
+	 */
+	
 	private Jaguar gearMotor;
-	private Joystick stick, stick2; 
+	private Joystick stick, stick2;  
 	private DigitalInput limitSwitchHigh, limitSwitchLow; 
 	private boolean checkSwitchPosition;
 	
@@ -82,6 +87,7 @@ public class GearHanger {
 		SmartDashboard.putString("POV Position: ", povMsg);
 		SmartDashboard.putBoolean("gearDown ", checkSwitchPosition);
 	}
+	
 	private int hookDownCount = 0;
 	private int hookUpCount = 0; 
 	private final int switchCountLimit = 5;

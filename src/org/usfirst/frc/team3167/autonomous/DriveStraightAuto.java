@@ -6,12 +6,13 @@ import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
 
 public class DriveStraightAuto {
-	private final double fastSpeed = 0.75;
-	private final double slowSpeed = 0.3;
-	private final double driveFastTime = 1.0;// [sec]
-	private final double driveSlowTime = 0.6;// [sec]
+	private final double autoSpeed = 0.5;
+	//private final double slowSpeed = 0.3;
+	private final double driveFastTime = 0.85;// [sec] TODO: MODIFY THIS
+	//private final double driveSlowTime = 0.7;// [sec]
 	private final double pauseTime = 0.5;// [sec]
 	private final double reverseTime = 0.4;// [sec]
+	private final double rotateAdjustmentSpeed = 0.0095; 
 	
 	private final SimpleMecanumDrive drive;
 	private final GearHanger gearHanger; 
@@ -20,7 +21,6 @@ public class DriveStraightAuto {
 	// Can't use a standard java timer in a real-time application
 	// We'll keep track of time on our own
 	private double elapsedTime;// [sec]
-	
 	private final double hookSpeed = 0.7; 
 	
 	public DriveStraightAuto(SimpleMecanumDrive drive, GearHanger gearHanger, HolonomicDrive holoDrive) {
@@ -48,22 +48,22 @@ public class DriveStraightAuto {
 		switch (state)
 		{
 		case DriveForwardFast:
-			drive.Drive(0.0, -fastSpeed, 0.0075, false);
+			drive.Drive(0.0, -autoSpeed, rotateAdjustmentSpeed, false);
 			
 			if (elapsedTime >= driveFastTime)
 			{
-				state = State.DriveForwardSlow;
+				state = State.PauseBeforeHang;
 			}
 			break;
 			
-		case DriveForwardSlow:
-			drive.Drive(0.0, -slowSpeed, 0.0075 * slowSpeed / fastSpeed, false);
+		/* case DriveForwardSlow:
+			drive.Drive(0.0, -slowSpeed, rotateAdjustmentSpeed * slowSpeed / fastSpeed, false);
 			
 			if (elapsedTime >= driveSlowTime)
 			{
 				state = State.PauseBeforeHang;
 			}
-			break;
+			break; */
 			
 		case PauseBeforeHang:
 			drive.Drive(0.0, 0.0, 0.0, false);
@@ -94,7 +94,7 @@ public class DriveStraightAuto {
 			break;
 			
 		case Reverse:
-			drive.Drive(0.0, fastSpeed, 0.0, false);
+			drive.Drive(0.0, autoSpeed, 0.0, false);
 			
 			if (elapsedTime >= reverseTime)
 				state = State.Stop;

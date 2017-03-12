@@ -37,7 +37,7 @@ public class SimpleMecanumDrive {
 			
 		x = x * speedReductionFactor;
 		y = y * speedReductionFactor;
-		rotation = rotation * speedReductionFactor;
+		rotation = rotation * (speedReductionFactor + 0.05); 
 		
 		if (Math.abs(x) < deadband)
 			x = 0.0;
