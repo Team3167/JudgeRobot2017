@@ -6,13 +6,13 @@ import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
 
 public class DriveStraightAuto {
-	private final double autoSpeed = 0.5;
+	private final double autoSpeed = 0.85;	
 	//private final double slowSpeed = 0.3;
-	private final double driveFastTime = 0.85;// [sec] TODO: MODIFY THIS
+	private final double driveFastTime = 1.6;// [sec] TODO: MODIFY THIS
 	//private final double driveSlowTime = 0.7;// [sec]
 	private final double pauseTime = 0.5;// [sec]
 	private final double reverseTime = 0.4;// [sec]
-	private final double rotateAdjustmentSpeed = 0.0095; 
+	private final double rotateAdjustmentSpeed = -0.015; 
 	
 	private final SimpleMecanumDrive drive;
 	private final GearHanger gearHanger; 
@@ -52,7 +52,7 @@ public class DriveStraightAuto {
 			
 			if (elapsedTime >= driveFastTime)
 			{
-				state = State.PauseBeforeHang;
+				state = State.Stop;
 			}
 			break;
 			
@@ -65,7 +65,7 @@ public class DriveStraightAuto {
 			}
 			break; */
 			
-		case PauseBeforeHang:
+		/* case PauseBeforeHang:
 			drive.Drive(0.0, 0.0, 0.0, false);
 			
 			if (elapsedTime >= pauseTime)
@@ -91,18 +91,18 @@ public class DriveStraightAuto {
 			{
 				state = State.Reverse;
 			}
-			break;
+			break; 
 			
 		case Reverse:
 			drive.Drive(0.0, autoSpeed, 0.0, false);
 			
 			if (elapsedTime >= reverseTime)
 				state = State.Stop;
-			break;
+			break; */
 			
 		case Stop:
 			drive.Drive(0.0, 0.0, 0.0, false);
-			gearHanger.gearHangAuto(-hookSpeed);
+			//gearHanger.gearHangAuto(-hookSpeed);
 			break;
 		}
 		

@@ -148,5 +148,4 @@ public class GearHanger {
 		else if (hookUpCount > switchCountLimit)
 			hookIsUp = false;
 	}
-
 }
