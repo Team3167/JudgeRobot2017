@@ -2,6 +2,7 @@
 package org.usfirst.frc.team3167.robot;
 
 import org.usfirst.frc.team3167.autonomous.DriveStraightAuto;
+import org.usfirst.frc.team3167.autonomous.JudgeCommand;
 import org.usfirst.frc.team3167.autonomous.Networking;
 import org.usfirst.frc.team3167.autonomous.Vision;
 import org.usfirst.frc.team3167.objectcontrol.Climber;
@@ -10,17 +11,14 @@ import org.usfirst.frc.team3167.robot.drive.HolonomicDrive;
 import org.usfirst.frc.team3167.robot.drive.HolonomicPositioner;
 import org.usfirst.frc.team3167.robot.drive.RobotPosition;
 import org.usfirst.frc.team3167.robot.drive.SimpleMecanumDrive;
-import org.usfirst.frc.team3167.robot.util.JoystickButton;
-import org.usfirst.frc.team3167.robot.util.JoystickWrapper;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 /**
@@ -32,7 +30,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
  */
 public class Robot extends IterativeRobot {
     //String climberCamLoc, gearCamLoc, finalCam;
-    //SendableChooser chooser;
+    SendableChooser<Command> chooser;
     
     static final private double robotFrequency = 50.0;// [Hz]
     
@@ -56,6 +54,9 @@ public class Robot extends IterativeRobot {
     private GearHanger gearHanger;
     private DriveStraightAuto auto; 
     
+    private JudgeCommand straightAuto;
+    private JudgeCommand gearAuto;
+    
     static final private int encoderLeftFrontA = 16;
     static final private int encoderLeftFrontB = 17;
     static final private int encoderRightFrontA = 14;
@@ -70,16 +71,24 @@ public class Robot extends IterativeRobot {
     static final private int motorRightFrontChannel = 4;
     static final private int motorRightRearChannel = 3; 
     
+    static final private int pulsesPerRev = 1024; 
+    
     private boolean slideLocked = false; 
+    
+    private boolean autoState; 
 	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
-        /*chooser = new SendableChooser();
-        chooser.addDefault("gearCam", gearCamLoc);
-        chooser.addObject("climberCam", climberCamLoc); */
+        chooser = new SendableChooser<Command>();
+        
+        straightAuto = new JudgeCommand("straightAuto");
+        gearAuto = new JudgeCommand("gearAuto");
+        
+        chooser.addDefault("straightAuto", straightAuto);
+        chooser.addObject("gearAuto", gearAuto); 
     	
     	stick = new Joystick(1); 
     	stick2 = new Joystick(2); 
@@ -108,7 +117,8 @@ public class Robot extends IterativeRobot {
     	
     	gearHanger = new GearHanger(1, 2, 6, 8, 9); 
     	
-    	auto = new DriveStraightAuto(mecanumDrive, gearHanger, drive);
+    	auto = new DriveStraightAuto(mecanumDrive, gearHanger, drive); 
+    			
     	
     	//joystick, gearPort, climberPort
     	vision = new Vision(stick, 0, 1);
@@ -130,7 +140,20 @@ public class Robot extends IterativeRobot {
 		System.out.println("Auto selected: " + autoSelected);*/
     	
     	//auto = new DriveStraightAuto(mecanumDrive, autoDriveSpeed, autoDriveTime);
+    	
+    	Command autoCmd = (Command) chooser.getSelected();
+    	
+    	if(autoCmd.getName() == "straightAuto") {
+    		autoState = true; 
+    	}
+    	else if(autoCmd.getName() == "gearAuto") {
+    		autoState = false; 
+    	}
+    	
     	auto.resetTime();
+    	
+    	//autoState = chooser.getSelected(); 
+    	//if(autoState)
     }
 
     /**
@@ -148,7 +171,8 @@ public class Robot extends IterativeRobot {
     	}*/
     	
     	drive.UpdateEstimates();
-    	auto.execute(); 
+    	
+    	auto.execute(autoState); 
     }
     
     public void teleopInit() {
@@ -159,7 +183,7 @@ public class Robot extends IterativeRobot {
     /**
      * This function is called periodically during operator control
      */
-/*<<<<<<< HEAD
+/*<<<<<<< HEAD53
     public void teleopPeriodic() {
         if (rpiInterface.GotPositionUpdate())
         {

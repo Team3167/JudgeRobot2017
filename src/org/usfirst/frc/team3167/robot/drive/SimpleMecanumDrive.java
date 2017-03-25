@@ -46,7 +46,7 @@ public class SimpleMecanumDrive {
 			y = 0.0;
 		
 		//twist deadband is awfully high
-		if (Math.abs(rotation) < (deadband + 0.065))
+		if (Math.abs(rotation) < (deadband + 0.070))
 			rotation = 0.0; 
 		
 		double wheelSpeeds[] = new double[4];
